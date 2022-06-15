@@ -1,0 +1,31 @@
+
+/* Storage Slots */
+#define constant VAL_LOCATION = FREE_STORAGE_POINTER()
+
+/* Constructor */
+#define macro CONSTRUCTOR() = takes(0) returns (0) {}
+
+//Get the value from storage
+#define macro GET() = takes (0) returns (1) {
+    [VAL_LOCATION] sload 0x00 mstore                     
+    0x20 0x00 return
+}
+
+//Update the value in storage
+#define macro STORE() = takes (1) returns (0) {
+    [VAL_LOCATION] sstore                     
+}
+
+
+// Main Macro
+#define macro MAIN() = takes(0) returns (0) {
+    // Identify which function is being called.
+    0x00 calldataload 0xE0 shr
+    dup1 0xa9059cbb eq get jumpi
+    dup1 0x6d4ce63c eq store jumpi
+
+    get:
+        GET()
+    store:
+        STORE()
+}
