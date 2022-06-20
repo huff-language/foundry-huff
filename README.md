@@ -24,8 +24,6 @@ A Foundry template to compile and test Huff contracts.
                                 ███████ ██    ██ █████   █████
                                 ██   ██ ██    ██ ██      ██
                                 ██   ██  ██████  ██      ██
-
-
 ```
 
 <br>
