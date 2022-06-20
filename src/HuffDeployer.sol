@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.8.13;
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.7.0 <0.9.0;
 
 ///@notice This cheat codes interface is named _CheatCodes so you can use the CheatCodes interface in other testing files without errors
 interface _CheatCodes {
@@ -22,7 +22,7 @@ contract HuffDeployer {
         ///@notice create a list of strings with the commands necessary to compile Huff contracts
         string[] memory cmds = new string[](3);
         cmds[0] = "huffc";
-        cmds[1] = string.concat("huff_contracts/", fileName, ".huff");
+        cmds[1] = string(string.concat("src/", bytes(fileName), ".huff"));
         cmds[2] = "--bytecode -n";
 
         ///@notice compile the Huff contract and return the bytecode
