@@ -20,13 +20,14 @@ contract HuffDeployer {
 
     function deployContract(string memory fileName) public returns (address) {
         ///@notice create a list of strings with the commands necessary to compile Huff contracts
-        string[] memory cmds = new string[](3);
+        string[] memory cmds = new string[](4);
         cmds[0] = "huffc";
-        cmds[1] = string(string.concat("src/", bytes(fileName), ".huff"));
-        cmds[2] = "--bytecode -n";
+        cmds[1] = string(string.concat("src/", fileName, ".huff"));
+        cmds[2] = "--bytecode";
+        cmds[3] = "-n";
 
         ///@notice compile the Huff contract and return the bytecode
-        bytes memory bytecode = abi.decode(cheatCodes.ffi(cmds), (bytes));
+        bytes memory bytecode = cheatCodes.ffi(cmds);
 
         ///@notice deploy the bytecode with the create instruction
         address deployedAddress;
