@@ -15,7 +15,7 @@ contract SimpleStoreTest is DSTest {
 
     function setUp() public {
         ///@notice deploy a new instance of ISimplestore by passing in the address of the deployed Huff contract
-        simpleStore = ISimpleStore(huffDeployer.deployContract("SimpleStore"));
+        simpleStore = ISimpleStore(huffDeployer.deployContract("test/contracts/SimpleStore"));
     }
 
     function testGet() public {
