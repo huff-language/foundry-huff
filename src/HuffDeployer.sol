@@ -18,7 +18,7 @@ contract HuffDeployer {
     ///@param fileName - The file name of the Huff contract. For example, the file name for "SimpleStore.huff" is "SimpleStore"
     ///@return deployedAddress - The address that the contract was deployed to
 
-    function deployContract(string memory fileName) public returns (address) {
+    function deploy(string memory fileName) public returns (address) {
         ///@notice create a list of strings with the commands necessary to compile Huff contracts
         string[] memory cmds = new string[](4);
         cmds[0] = "huffc";

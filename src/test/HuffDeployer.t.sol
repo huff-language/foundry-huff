@@ -18,7 +18,7 @@ contract HuffDeployerTest is DSTest {
 
     function setUp() public {
         ///@notice deploy a new instance of ISimplestore by passing in the address of the deployed Huff contract
-        number = Number(huffDeployer.deployContract("test/contracts/Number"));
+        number = Number(huffDeployer.deploy("test/contracts/Number"));
     }
 
     function testSet(uint256 num) public {
