@@ -5,24 +5,24 @@ import "../../lib/ds-test/test.sol";
 import "forge-std/console.sol";
 import "../HuffDeployer.sol";
 
-import "./interfaces/ISimpleStore.sol";
+interface Number {
+    function setNumber(uint256) external;
+    function getNumber() external returns (uint256);
+}
 
-contract SimpleStoreTest is DSTest {
+contract HuffDeployerTest is DSTest {
     ///@notice create a new instance of HuffDeployer
     HuffDeployer huffDeployer = new HuffDeployer();
 
-    ISimpleStore simpleStore;
+    Number number;
 
     function setUp() public {
         ///@notice deploy a new instance of ISimplestore by passing in the address of the deployed Huff contract
-        simpleStore = ISimpleStore(huffDeployer.deployContract("test/contracts/SimpleStore"));
+        number = Number(huffDeployer.deployContract("test/contracts/Number"));
     }
 
-    function testGet() public {
-        simpleStore.get();
-    }
-
-    function testStore(uint256 val) public {
-        simpleStore.store(val);
+    function testSet(uint256 num) public {
+        number.setNumber(num);
+        assertEq(num, number.getNumber());
     }
 }
