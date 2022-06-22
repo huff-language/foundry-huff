@@ -22,7 +22,7 @@ contract HuffDeployer {
         ///@notice create a list of strings with the commands necessary to compile Huff contracts
         string[] memory cmds = new string[](4);
         cmds[0] = "huffc";
-        cmds[1] = string(string.concat("src/", bytes(fileName), ".huff"));
+        cmds[1] = string(string.concat("src/", fileName, ".huff"));
         cmds[2] = "--bytecode";
         cmds[3] = "-n";
 
