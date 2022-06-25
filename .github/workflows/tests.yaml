@@ -13,9 +13,12 @@ jobs:
         uses: onbjerg/foundry-toolchain@v1
         with:
           version: nightly
+
       - name: Install Dependencies
-        run: yarn
+        run: forge install
       - name: Update Modules
-        run: yarn sync
+        run: forge update
+      - name: Run lints
+        run: forge build
       - name: Run Tests
-        run: FOUNDRY_PROFILE=ci yarn test
+        run: forge test
