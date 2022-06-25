@@ -15,7 +15,9 @@ jobs:
           version: nightly
 
       - name: Install Huff
-        run: curl -L get.huff.sh | bash -s -- -y && huffup -b stage
+        run: curl -L get.huff.sh | bash -s -- -y \
+              && source /home/runner/.bashrc \
+              && huffup -b stage
 
       - name: Install Dependencies
         run: forge install
