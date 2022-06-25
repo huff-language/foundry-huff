@@ -1,1 +1,1 @@
-forge-std=lib/forge-std/src
+forge-std/=lib/forge-std/src/
