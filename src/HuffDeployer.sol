@@ -17,7 +17,8 @@ library HuffDeployer {
         string[] memory cmds = new string[](4);
         cmds[0] = "huffc";
         cmds[1] = string(string.concat("src/", fileName, ".huff"));
-        cmds[2] = "-b";
+        cmds[2] = "-n";
+        cmds[3] = "--bytecode";
 
         /// @notice compile the Huff contract and return the bytecode
         bytes memory bytecode = vm.ffi(cmds);
