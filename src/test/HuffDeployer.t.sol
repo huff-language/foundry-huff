@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-import "../../lib/ds-test/test.sol";
+import "forge-std/Test.sol";
 import "forge-std/console.sol";
 import "../HuffDeployer.sol";
 
@@ -10,7 +10,10 @@ interface Number {
     function getNumber() external returns (uint256);
 }
 
-contract HuffDeployerTest is DSTest {
+contract HuffDeployerTest is Test {
+    ///@notice create a new instance of HuffDeployer
+    HuffDeployer huffDeployer = new HuffDeployer();
+
     Number number;
 
     function setUp() public {
