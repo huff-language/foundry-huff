@@ -11,14 +11,11 @@ interface Number {
 }
 
 contract HuffDeployerTest is DSTest {
-    ///@notice create a new instance of HuffDeployer
-    HuffDeployer huffDeployer = new HuffDeployer();
-
     Number number;
 
     function setUp() public {
         ///@notice deploy a new instance of ISimplestore by passing in the address of the deployed Huff contract
-        number = Number(huffDeployer.deploy("test/contracts/Number"));
+        number = Number(HuffDeployer.deploy("test/contracts/Number"));
     }
 
     function testSet(uint256 num) public {
