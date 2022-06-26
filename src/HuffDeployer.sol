@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13 <0.9.0; 
 
-
-
 library HuffDeployer {
     /// @notice Initializes cheat codes in order to use ffi to compile Huff contracts
     VM constant vm = VM(address(bytes20(uint160(uint256(keccak256("hevm cheat code"))))));
