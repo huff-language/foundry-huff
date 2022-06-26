@@ -14,7 +14,7 @@ library HuffDeployer {
 
     function deploy(string memory fileName) internal returns (address) {
         ///@notice create a list of strings with the commands necessary to compile Huff contracts
-        string[] memory cmds = new string[](4);
+        string[] memory cmds = new string[](3);
         cmds[0] = "huffc";
         cmds[1] = string(string.concat("src/", fileName, ".huff"));
         cmds[2] = "-b";
