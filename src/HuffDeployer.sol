@@ -6,19 +6,16 @@ interface _CheatCodes {
     function ffi(string[] calldata) external returns (bytes memory);
 }
 
-contract HuffDeployer {
-    address constant HEVM_ADDRESS =
-        address(bytes20(uint160(uint256(keccak256("hevm cheat code")))));
-
+library HuffDeployer {
     /// @notice Initializes cheat codes in order to use ffi to compile Huff contracts
-    _CheatCodes cheatCodes = _CheatCodes(HEVM_ADDRESS);
+    _CheatCodes constant cheatCodes = _CheatCodes(address(bytes20(uint160(uint256(keccak256("hevm cheat code"))))));
 
     ///@notice Compiles a Huff contract and returns the address that the contract was deployeod to
     ///@notice If deployment fails, an error will be thrown
     ///@param fileName - The file name of the Huff contract. For example, the file name for "SimpleStore.huff" is "SimpleStore"
     ///@return deployedAddress - The address that the contract was deployed to
 
-    function deploy(string memory fileName) public returns (address) {
+    function deploy(string memory fileName) internal returns (address) {
         ///@notice create a list of strings with the commands necessary to compile Huff contracts
         string[] memory cmds = new string[](4);
         cmds[0] = "huffc";
