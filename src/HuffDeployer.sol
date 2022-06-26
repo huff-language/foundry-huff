@@ -14,11 +14,12 @@ library HuffDeployer {
 
     function deploy(string memory fileName) internal returns (address) {
         ///@notice create a list of strings with the commands necessary to compile Huff contracts
-        string[] memory cmds = new string[](4);
-        cmds[0] = "huffc";
-        cmds[1] = string(string.concat("src/", fileName, ".huff"));
-        cmds[2] = "-n";
-        cmds[3] = "--bytecode";
+        string[] memory cmds = new string[](5);
+        cmds[0] = "npx";
+        cmds[1] = "huffc";
+        cmds[2] = string(string.concat("src/", fileName, ".huff"));
+        cmds[3] = "-n";
+        cmds[4] = "--bytecode";
 
         /// @notice compile the Huff contract and return the bytecode
         bytes memory bytecode = vm.ffi(cmds);
