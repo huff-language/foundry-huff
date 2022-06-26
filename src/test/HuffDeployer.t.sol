@@ -11,9 +11,6 @@ interface Number {
 }
 
 contract HuffDeployerTest is Test {
-    ///@notice create a new instance of HuffDeployer
-    HuffDeployer huffDeployer = new HuffDeployer();
-
     Number number;
 
     function setUp() public {
