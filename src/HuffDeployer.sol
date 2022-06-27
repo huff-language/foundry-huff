@@ -9,7 +9,6 @@ library HuffDeployer {
     ///@notice If deployment fails, an error will be thrown
     ///@param fileName - The file name of the Huff contract. For example, the file name for "SimpleStore.huff" is "SimpleStore"
     ///@return deployedAddress - The address that the contract was deployed to
-
     function deploy(string memory fileName) internal returns (address) {
         ///@notice create a list of strings with the commands necessary to compile Huff contracts
         string[] memory cmds = new string[](3);
