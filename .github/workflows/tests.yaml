@@ -21,16 +21,7 @@ jobs:
         with:
           version: nightly
 
-      - name: Which huffc
-        run: which huffc
-
-      # - name: Symlink
-      #   run: ln -S $(which huffc) huffc
-
-      - name: Where are we?
-        run: ls -lsa
-
-      - name: Bytecode Number.huff
+      - name: Print the Bytecode for fun
         run: huffc -b src/test/contracts/Number.huff
 
       - name: Run Tests
