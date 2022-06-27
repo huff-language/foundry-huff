@@ -21,5 +21,11 @@ jobs:
         with:
           version: nightly
 
+      - name: Which huffc
+        run: which huffc
+
+      - name: Symlink
+        run: ln -S /home/runner/.huff/bin/huffc huffc
+
       - name: Run Tests
         run: forge test -vvv
