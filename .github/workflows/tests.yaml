@@ -21,7 +21,5 @@ jobs:
         with:
           version: nightly
 
-      - name: Run lints
-        run: forge build
       - name: Run Tests
-        run: forge test
+        run: forge test -vvv
