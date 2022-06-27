@@ -30,9 +30,16 @@ A Foundry template to compile and test Huff contracts.
 
 # Installation
 
+First, install the [huff compiler](https://github.com/huff-language/huff-rs) by running:
+```
+curl -L get.huff.sh | bash
+```
+
+Then, install this library with [forge](https://github.com/foundry-rs/foundry):
 ```
 forge install huff-language/foundry-huff
 ```
+
 
 # Usage
 
