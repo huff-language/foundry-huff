@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.13 <0.9.0; 
+pragma solidity >=0.8.13 <0.9.0;
 
 library HuffDeployer {
     /// @notice Initializes cheat codes in order to use ffi to compile Huff contracts
@@ -12,12 +12,10 @@ library HuffDeployer {
 
     function deploy(string memory fileName) internal returns (address) {
         ///@notice create a list of strings with the commands necessary to compile Huff contracts
-        string[] memory cmds = new string[](5);
-        cmds[0] = "npx";
-        cmds[1] = "huffc";
-        cmds[2] = string(string.concat("src/", fileName, ".huff"));
-        cmds[3] = "-n";
-        cmds[4] = "--bytecode";
+        string[] memory cmds = new string[](3);
+        cmds[0] = "huffc";
+        cmds[1] = string(string.concat("src/", fileName, ".huff"));
+        cmds[2] = "-b";
 
         /// @notice compile the Huff contract and return the bytecode
         bytes memory bytecode = vm.ffi(cmds);
