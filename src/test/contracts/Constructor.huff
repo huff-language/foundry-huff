@@ -1,0 +1,62 @@
+/* Interface */
+#define function getArgOne() view returns (address)
+#define function getArgTwo() view returns (uint256)
+
+/* Storage Slots */
+#define constant CONSTRUCTOR_ARG_ONE = FREE_STORAGE_POINTER()
+#define constant CONSTRUCTOR_ARG_TWO = FREE_STORAGE_POINTER()
+
+/* Constructor */
+#define macro CONSTRUCTOR() = takes(0) returns (0) {
+  // -------------            --------------------------
+  // | OPERATION |            | STACK (POST-OPERATION) |
+  // -------------            --------------------------
+
+  // Copy the first argument into memory
+  0x20                        // [size] - byte size to copy
+  0x40 codesize sub           // [offset, size] - offset in the code to copy from
+  0x00                        // [mem, offset, size] - offset in memory to copy to
+  codecopy                    // []
+
+  // Store the first argument in storage
+  0x00 mload                  // [arg]
+  [CONSTRUCTOR_ARG_ONE]       // [CONSTRUCTOR_ARG_ONE, arg]
+  sstore                      // []
+
+  // Copy the second argument into memory
+  0x20                        // [size] - byte size to copy
+  0x20 codesize sub           // [offset, size] - offset in the code to copy from
+  0x00                        // [mem, offset, size] - offset in memory to copy to
+  codecopy                    // []
+
+  // Store the second argument in storage
+  0x00 mload                  // [arg]
+  [CONSTRUCTOR_ARG_TWO]       // [CONSTRUCTOR_ARG_TWO, arg]
+  sstore                      // []
+}
+
+/* First Argument Accessor */
+#define macro GET_ARG_ONE() = takes (0) returns (0) {
+    [CONSTRUCTOR_ARG_ONE] sload
+    0x00 mstore
+    0x20 0x00 return
+}
+
+/* Second Argument Accessor */
+#define macro GET_ARG_TWO() = takes (0) returns (0) {
+    [CONSTRUCTOR_ARG_TWO] sload
+    0x00 mstore
+    0x20 0x00 return
+}
+
+/* Main Macro */
+#define macro MAIN() = takes (0) returns (0) {
+    0x00 calldataload 0xE0 shr
+    dup1 0xbb01e52d eq arg_one jumpi
+    dup1 0x98e45be4 eq arg_two jumpi
+
+    arg_one:
+        GET_ARG_ONE()
+    arg_two:
+        GET_ARG_TWO()
+}

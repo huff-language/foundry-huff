@@ -10,12 +10,36 @@ interface Number {
     function getNumber() external returns (uint256);
 }
 
+interface Constructor {
+    function getArgOne() external returns (address);
+    function getArgTwo() external returns (uint256);
+}
+
 contract HuffDeployerTest is Test {
     Number number;
+    Constructor structor;
 
     function setUp() public {
-        ///@notice deploy a new instance of ISimplestore by passing in the address of the deployed Huff contract
         number = Number(HuffDeployer.deploy("test/contracts/Number"));
+
+        // Showcase alignment of address
+        bytes memory first_arg = abi.encode(address(0x420));
+        // abi encoded first_arg should equal the below 32 byte slot
+        // "0000000000000000000000004200000000000000000000000000000000000000"
+
+        // Create Constructor
+        structor = Constructor(HuffDeployer.deploy_with_args(
+            "test/contracts/Constructor",
+            bytes.concat(first_arg, abi.encode(uint256(0x420)))
+        ));
+    }
+
+    function testArgOne() public {
+        assertEq(address(0x420), structor.getArgOne());
+    }
+
+    function testArgTwo() public {
+        assertEq(uint256(0x420), structor.getArgTwo());
     }
 
     function testBytecode() public {
