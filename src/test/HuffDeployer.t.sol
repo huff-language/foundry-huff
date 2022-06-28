@@ -23,13 +23,14 @@ contract HuffDeployerTest is Test {
         number = Number(HuffDeployer.deploy("test/contracts/Number"));
 
         // Showcase alignment of address
-        bytes memory first_arg = abi.encodePacked(address(0x420));
-        // assertEq(bytes(hex"0000000000000000000000004200000000000000000000000000000000000000"), first_arg);
+        bytes memory first_arg = abi.encode(address(0x420));
+        // abi encoded first_arg should equal the below 32 byte slot
+        // "0000000000000000000000004200000000000000000000000000000000000000"
 
         // Create Constructor
         structor = Constructor(HuffDeployer.deploy_with_args(
             "test/contracts/Constructor",
-            bytes.concat(first_arg, abi.encodePacked(uint256(0x420)))
+            bytes.concat(first_arg, abi.encode(uint256(0x420)))
         ));
     }
 

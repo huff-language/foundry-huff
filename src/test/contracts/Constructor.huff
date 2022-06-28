@@ -42,12 +42,14 @@
     0x20 0x00 return
 }
 
+/* Second Argument Accessor */
 #define macro GET_ARG_TWO() = takes (0) returns (0) {
     [CONSTRUCTOR_ARG_TWO] sload
     0x00 mstore
     0x20 0x00 return
 }
 
+/* Main Macro */
 #define macro MAIN() = takes (0) returns (0) {
     0x00 calldataload 0xE0 shr
     dup1 0xbb01e52d eq arg_one jumpi
@@ -57,5 +59,4 @@
         GET_ARG_ONE()
     arg_two:
         GET_ARG_TWO()
-
 }
