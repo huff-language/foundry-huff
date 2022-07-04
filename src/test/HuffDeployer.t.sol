@@ -31,6 +31,7 @@ contract HuffDeployerTest is Test {
         chained = IConstructor(
             HuffDeployer.config()
             .with_args(bytes.concat(first_arg, abi.encode(uint256(0x420))))
+            .with_code("#define macro CONSTRUCTOR() = takes(0) returns (0) {}")
             .deploy("test/contracts/Constructor")
         );
     }
