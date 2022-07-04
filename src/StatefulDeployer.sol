@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.13 <0.9.0;
 
-import {strings} from "stringutils";
+import {strings} from "stringutils/strings.sol";
 import {HuffDeployer} from "./HuffDeployer.sol";
+import "forge-std/console.sol";
+import {Vm} from "forge-std/Vm.sol";
 
 contract StatefulDeployer {
   using strings for *;
+
+  /// @notice Initializes cheat codes in order to use ffi to compile Huff contracts
+  Vm public constant vm = Vm(address(bytes20(uint160(uint256(keccak256("hevm cheat code"))))));
 
   /// @notice additional code to append to the source file
   string public code;
@@ -28,41 +33,52 @@ contract StatefulDeployer {
     // Split the file into it's parts
     strings.slice memory s = file.toSlice();
     strings.slice memory delim = "/".toSlice();
-    string[] memory parts = new string[](s.count(delim));
+    string[] memory parts = new string[](s.count(delim) + 1);
     for (uint i = 0; i < parts.length; i++) {
       parts[i] = s.split(delim).toString();
     }
 
     // Re-concatenate the file with a "__TEMP__" prefix
-    string memory tempFile = parts[i];
+    string memory tempFile = parts[0];
     for (uint i = 1; i < parts.length - 1; i++) {
       tempFile = string.concat(tempFile, "/", parts[i]);
     }
     tempFile = string.concat(tempFile, "/", "__TEMP__", parts[parts.length - 1]);
 
-    // Paste the code in a new temp file
-    string[] memory create_cmds = new string[](6);
-    create_cmds[0] = "echo";
-    create_cmds[1] = code;
-    create_cmds[2] = "|";
-    create_cmds[3] = "cat";
-    create_cmds[4] = ">";
-    create_cmds[5] = tempFile;
-    HuffDeployer.vm.ffi(create_cmds);
+    // Remove temp file
+    // string[] memory remove_cmds = new string[](1);
+    // remove_cmds[0] = string.concat("rm src/", tempFile, ".huff");
+    // vm.ffi(remove_cmds);
 
-    // echo "" | cat > src/__TEMP__test/contracts/Number.huff
+    // echo code test
+    string[] memory echo_code = new string[](5);
+    echo_code[0] = "echo";
+    echo_code[1] = "-n";
+    echo_code[2] = string(string.concat("\"", code, "\""));
+    echo_code[3] = " > test.txt";
+    echo_code[4] = " && echo -n 0x01";
+    bytes memory echo_res = vm.ffi(echo_code);
+    console.logBytes(echo_res);
+
+    // Paste the code in a new temp file
+    string[] memory create_cmds = new string[](3);
+    create_cmds[0] = string.concat("echo -n \"", code, "\"");
+    create_cmds[1] = ">";
+    create_cmds[2] = string.concat("src/", tempFile, ".huff");
+
+    console.logString(string.concat(create_cmds[0], " ", create_cmds[1], " ", create_cmds[2]));
+    bytes memory unneeded_output = vm.ffi(create_cmds);
+    console.logBytes(unneeded_output);
 
     // Append the real code to the temp file
     string[] memory append_cmds = new string[](4);
     append_cmds[0] = "cat";
     append_cmds[1] = file;
     append_cmds[2] = ">>";
-    append_cmds[3] = tempFile;
-    HuffDeployer.vm.ffi(append_cmds);
+    append_cmds[3] = string.concat("src/", tempFile, ".huff");
+    vm.ffi(append_cmds);
 
     // Deploy with args the temp file
     return HuffDeployer.deploy_with_args(tempFile, args);
   }
-
-
 }
