@@ -1,4 +1,4 @@
-<img align="right" width="400" height="160" top="140" src="./assets/banner.jpg">
+<img align="right" width="400" height="160" top="140" src="./assets/foundry_huff_banner.jpg">
 
 
 # Foundry x Huff
