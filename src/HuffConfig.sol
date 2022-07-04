@@ -47,14 +47,15 @@ contract HuffConfig {
 
     // Paste the code in a new temp file
     string[] memory create_cmds = new string[](3);
-    create_cmds[0] = "./scripts/file_writer.sh";
+    // create_cmds[0] = "$(find . -name \"file_writer.sh\")";
+    create_cmds[0] = "./lib/foundry-huff/scripts/file_writer.sh";
     create_cmds[1] = string.concat("src/", tempFile, ".huff");
     create_cmds[2] = string.concat(code, "\n");
     vm.ffi(create_cmds);
 
     // Append the real code to the temp file
     string[] memory append_cmds = new string[](3);
-    append_cmds[0] = "./scripts/read_and_append.sh";
+    append_cmds[0] = "./lib/foundry-huff/scripts/read_and_append.sh";
     append_cmds[1] = string.concat("src/", tempFile, ".huff");
     append_cmds[2] = string.concat("src/", file, ".huff");
     vm.ffi(append_cmds);
