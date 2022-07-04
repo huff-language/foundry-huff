@@ -1,26 +1,18 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.7.0 <0.9.0;
 
 import "forge-std/Test.sol";
-import "forge-std/console.sol";
-import "../HuffDeployer.sol";
 
-interface Number {
-    function setNumber(uint256) external;
-    function getNumber() external returns (uint256);
-}
-
-interface Constructor {
-    function getArgOne() external returns (address);
-    function getArgTwo() external returns (uint256);
-}
+import {HuffDeployer} from "../HuffDeployer.sol";
+import {INumber} from "./interfaces/INumber.sol";
+import {IConstructor} from "./interfaces/IConstructor.sol";
 
 contract HuffDeployerTest is Test {
-    Number number;
-    Constructor structor;
+    INumber number;
+    IConstructor structor;
 
     function setUp() public {
-        number = Number(HuffDeployer.deploy("test/contracts/Number"));
+        number = INumber(HuffDeployer.deploy("test/contracts/Number"));
 
         // Showcase alignment of address
         bytes memory first_arg = abi.encode(address(0x420));
@@ -28,7 +20,7 @@ contract HuffDeployerTest is Test {
         // "0000000000000000000000004200000000000000000000000000000000000000"
 
         // Create Constructor
-        structor = Constructor(HuffDeployer.deploy_with_args(
+        structor = IConstructor(HuffDeployer.deploy_with_args(
             "test/contracts/Constructor",
             bytes.concat(first_arg, abi.encode(uint256(0x420)))
         ));
