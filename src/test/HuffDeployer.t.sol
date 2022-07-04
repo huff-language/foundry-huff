@@ -1,45 +1,71 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.7.0 <0.9.0;
 
 import "forge-std/Test.sol";
-import "forge-std/console.sol";
-import "../HuffDeployer.sol";
 
-interface Number {
-    function setNumber(uint256) external;
-    function getNumber() external returns (uint256);
-}
-
-interface Constructor {
-    function getArgOne() external returns (address);
-    function getArgTwo() external returns (uint256);
-}
+import {HuffConfig} from "../HuffConfig.sol";
+import {HuffDeployer} from "../HuffDeployer.sol";
+import {INumber} from "./interfaces/INumber.sol";
+import {IConstructor} from "./interfaces/IConstructor.sol";
 
 contract HuffDeployerTest is Test {
-    Number number;
-    Constructor structor;
+    INumber number;
+    IConstructor structor;
+    IConstructor chained;
 
     function setUp() public {
-        number = Number(HuffDeployer.deploy("test/contracts/Number"));
+        number = INumber(HuffDeployer.deploy("test/contracts/Number"));
 
         // Showcase alignment of address
         bytes memory first_arg = abi.encode(address(0x420));
         // abi encoded first_arg should equal the below 32 byte slot
         // "0000000000000000000000004200000000000000000000000000000000000000"
 
-        // Create Constructor
-        structor = Constructor(HuffDeployer.deploy_with_args(
+        // Backwards-compatible Constructor creation
+        structor = IConstructor(HuffDeployer.deploy_with_args(
             "test/contracts/Constructor",
             bytes.concat(first_arg, abi.encode(uint256(0x420)))
         ));
+
+        // Defined Constructor
+        string memory constructor_macro = "#define macro CONSTRUCTOR() = takes(0) returns (0) {"
+            "    // Copy the first argument into memory \n"
+            "    0x20                        // [size] - byte size to copy \n"
+            "    0x40 codesize sub           // [offset, size] - offset in the code to copy from\n "
+            "    0x00                        // [mem, offset, size] - offset in memory to copy to \n"
+            "    codecopy                    // [] \n"
+            "    // Store the first argument in storage\n"
+            "    0x00 mload                  // [arg] \n"
+            "    [CONSTRUCTOR_ARG_ONE]       // [CONSTRUCTOR_ARG_ONE, arg] \n"
+            "    sstore                      // [] \n"
+            "    // Copy the second argument into memory \n"
+            "    0x20                        // [size] - byte size to copy \n"
+            "    0x20 codesize sub           // [offset, size] - offset in the code to copy from \n"
+            "    0x00                        // [mem, offset, size] - offset in memory to copy to \n"
+            "    codecopy                    // [] \n"
+            "    // Store the second argument in storage \n"
+            "    0x00 mload                  // [arg] \n"
+            "    [CONSTRUCTOR_ARG_TWO]       // [CONSTRUCTOR_ARG_TWO, arg] \n"
+            "    sstore                      // [] \n"
+            "}";
+
+        // New pattern
+        chained = IConstructor(
+            HuffDeployer.config()
+            .with_args(bytes.concat(first_arg, abi.encode(uint256(0x420))))
+            .with_code(constructor_macro)
+            .deploy("test/contracts/NoConstructor")
+        );
     }
 
     function testArgOne() public {
         assertEq(address(0x420), structor.getArgOne());
+        assertEq(address(0x420), chained.getArgOne());
     }
 
     function testArgTwo() public {
         assertEq(uint256(0x420), structor.getArgTwo());
+        assertEq(uint256(0x420), chained.getArgTwo());
     }
 
     function testBytecode() public {
