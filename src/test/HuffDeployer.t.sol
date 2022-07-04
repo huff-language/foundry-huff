@@ -27,12 +27,34 @@ contract HuffDeployerTest is Test {
             bytes.concat(first_arg, abi.encode(uint256(0x420)))
         ));
 
+        // Defined Constructor
+        string memory constructor_macro = "#define macro CONSTRUCTOR() = takes(0) returns (0) {"
+            "    // Copy the first argument into memory \n"
+            "    0x20                        // [size] - byte size to copy \n"
+            "    0x40 codesize sub           // [offset, size] - offset in the code to copy from\n "
+            "    0x00                        // [mem, offset, size] - offset in memory to copy to \n"
+            "    codecopy                    // [] \n"
+            "    // Store the first argument in storage\n"
+            "    0x00 mload                  // [arg] \n"
+            "    [CONSTRUCTOR_ARG_ONE]       // [CONSTRUCTOR_ARG_ONE, arg] \n"
+            "    sstore                      // [] \n"
+            "    // Copy the second argument into memory \n"
+            "    0x20                        // [size] - byte size to copy \n"
+            "    0x20 codesize sub           // [offset, size] - offset in the code to copy from \n"
+            "    0x00                        // [mem, offset, size] - offset in memory to copy to \n"
+            "    codecopy                    // [] \n"
+            "    // Store the second argument in storage \n"
+            "    0x00 mload                  // [arg] \n"
+            "    [CONSTRUCTOR_ARG_TWO]       // [CONSTRUCTOR_ARG_TWO, arg] \n"
+            "    sstore                      // [] \n"
+            "}";
+
         // New pattern
         chained = IConstructor(
             HuffDeployer.config()
             .with_args(bytes.concat(first_arg, abi.encode(uint256(0x420))))
-            .with_code("#define macro CONSTRUCTOR() = takes(0) returns (0) {}")
-            .deploy("test/contracts/Constructor")
+            .with_code(constructor_macro)
+            .deploy("test/contracts/NoConstructor")
         );
     }
 

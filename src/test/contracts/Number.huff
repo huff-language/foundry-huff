@@ -5,8 +5,6 @@
 /* Storage Slots */
 #define constant NUMBER_LOCATION = FREE_STORAGE_POINTER()
 
-#define macro CONSTRUCTOR() = takes(0) returns (0) {}
-
 /* Methods */
 #define macro SET_NUMBER() = takes (0) returns (0) {
     0x04 calldataload   // [number]

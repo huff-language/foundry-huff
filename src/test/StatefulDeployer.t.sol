@@ -58,28 +58,9 @@ contract StatefulDeployerTest is Test {
     //     .deploy()
     // );
 
-    string memory main_macro = "#define macro CONSTRUCTOR() = takes(0) returns (0) {}";
-      // "    // Copy the first argument into memory"
-      // "    0x20                        // [size] - byte size to copy"
-      // "    0x40 codesize sub           // [offset, size] - offset in the code to copy from"
-      // "    0x00                        // [mem, offset, size] - offset in memory to copy to"
-      // "    codecopy                    // []"
-      // "    // Store the first argument in storage"
-      // "    0x00 mload                  // [arg]"
-      // "    [CONSTRUCTOR_ARG_ONE]       // [CONSTRUCTOR_ARG_ONE, arg]"
-      // "    sstore                      // []"
-      // "    // Copy the second argument into memory"
-      // "    0x20                        // [size] - byte size to copy"
-      // "    0x20 codesize sub           // [offset, size] - offset in the code to copy from"
-      // "    0x00                        // [mem, offset, size] - offset in memory to copy to"
-      // "    codecopy                    // []"
-      // "    // Store the second argument in storage"
-      // "    0x00 mload                  // [arg]"
-      // "    [CONSTRUCTOR_ARG_TWO]       // [CONSTRUCTOR_ARG_TWO, arg]"
-      // "    sstore                      // []"
-      // "}";
+    string memory constructor_macro = "#define macro CONSTRUCTOR() = takes(0) returns (0) {}";
 
-    deployer.setCode(main_macro);
+    deployer.setCode(constructor_macro);
 
     number = INumber(deployer.deploy("test/contracts/Number"));
     assertEq(number.getNumber(), 0);
