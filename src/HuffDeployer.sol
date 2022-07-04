@@ -1,38 +1,24 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.13 <0.9.0;
 
+import {Vm} from "forge-std/Vm.sol";
+import {HuffConfig} from "./HuffConfig.sol";
+
 library HuffDeployer {
     /// @notice Initializes cheat codes in order to use ffi to compile Huff contracts
-    VM public constant vm = VM(address(bytes20(uint160(uint256(keccak256("hevm cheat code"))))));
+    Vm public constant vm = Vm(address(bytes20(uint160(uint256(keccak256("hevm cheat code"))))));
+
+    /// @notice Create a new huff config
+    function config() public returns (HuffConfig) {
+        return new HuffConfig();
+    }
 
     /// @notice Compiles a Huff contract and returns the address that the contract was deployeod to
     /// @notice If deployment fails, an error will be thrown
     /// @param fileName - The file name of the Huff contract. For example, the file name for "SimpleStore.huff" is "SimpleStore"
     /// @return deployedAddress - The address that the contract was deployed to
     function deploy(string memory fileName) internal returns (address) {
-        ///@notice create a list of strings with the commands necessary to compile Huff contracts
-        string[] memory cmds = new string[](3);
-        cmds[0] = "huffc";
-        cmds[1] = string(string.concat("src/", fileName, ".huff"));
-        cmds[2] = "-b";
-
-        /// @notice compile the Huff contract and return the bytecode
-        bytes memory bytecode = vm.ffi(cmds);
-
-        /// @notice deploy the bytecode with the create instruction
-        address deployedAddress;
-        assembly {
-            deployedAddress := create(0, add(bytecode, 0x20), mload(bytecode))
-        }
-
-        /// @notice check that the deployment was successful
-        require(
-            deployedAddress != address(0),
-            "HuffDeployer could not deploy contract"
-        );
-
-        /// @notice return the address that the contract was deployed to
-        return deployedAddress;
+        return new HuffConfig().deploy(fileName);
     }
 
     /// @notice Compiles a Huff contract and returns the address that the contract was deployeod to
@@ -41,34 +27,6 @@ library HuffDeployer {
     /// @param args - Constructor Args to append to the bytecode
     /// @return deployedAddress - The address that the contract was deployed to
     function deploy_with_args(string memory fileName, bytes memory args) internal returns (address) {
-        /// Create a list of strings with the commands necessary to compile Huff contracts
-        string[] memory cmds = new string[](3);
-        cmds[0] = "huffc";
-        cmds[1] = string(string.concat("src/", fileName, ".huff"));
-        cmds[2] = "-b";
-
-        /// @notice compile the Huff contract and return the bytecode
-        bytes memory bytecode = vm.ffi(cmds);
-        bytes memory concatenated = bytes.concat(bytecode, args);
-
-        /// @notice deploy the bytecode with the create instruction
-        address deployedAddress;
-        assembly {
-            deployedAddress := create(0, add(concatenated, 0x20), mload(concatenated))
-        }
-
-        /// @notice check that the deployment was successful
-        require(
-            deployedAddress != address(0),
-            "HuffDeployer could not deploy contract"
-        );
-
-        /// @notice return the address that the contract was deployed to
-        return deployedAddress;
+        return new HuffConfig().with_args(args).deploy(fileName);
     }
-}
-
-///@notice This cheat codes interface is named _CheatCodes so you can use the CheatCodes interface in other testing files without errors
-interface VM {
-    function ffi(string[] calldata) external returns (bytes memory);
 }
