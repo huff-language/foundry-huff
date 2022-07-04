@@ -3,9 +3,9 @@ pragma solidity >=0.7.0 <0.9.0;
 
 import "forge-std/Test.sol";
 
-import {INumber} from "./interfaces/INumber.sol";
-import {IConstructor} from "./interfaces/IConstructor.sol";
-import {StatefulDeployer} from "../StatefulDeployer.sol";
+import {INumber} from "../test/interfaces/INumber.sol";
+import {IConstructor} from "../test/interfaces/IConstructor.sol";
+import {StatefulDeployer} from "./StatefulDeployer.sol";
 
 contract StatefulDeployerTest is Test {
   StatefulDeployer public deployer;

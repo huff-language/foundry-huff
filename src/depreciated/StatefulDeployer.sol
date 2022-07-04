@@ -3,7 +3,7 @@ pragma solidity >=0.8.13 <0.9.0;
 
 import {Vm} from "forge-std/Vm.sol";
 import {strings} from "stringutils/strings.sol";
-import {HuffDeployer} from "./HuffDeployer.sol";
+import {HuffDeployer} from "../HuffDeployer.sol";
 
 contract StatefulDeployer {
   using strings for *;
