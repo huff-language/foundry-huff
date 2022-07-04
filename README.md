@@ -1,6 +1,9 @@
-<img align="right" width="360" height="150" top="100" src="./assets/banner.jpg">
+<img align="right" width="400" height="160" top="140" src="./assets/banner.jpg">
 
-# Foundry x Huff • [![ci](https://github.com/huff-language/huff-rs/actions/workflows/ci.yaml/badge.svg)](https://github.com/huff-language/huff-rs/actions/workflows/ci.yaml) [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![Discord](https://img.shields.io/discord/980519274600882306)
+
+# Foundry x Huff
+
+[![ci](https://github.com/huff-language/huff-rs/actions/workflows/ci.yaml/badge.svg)](https://github.com/huff-language/huff-rs/actions/workflows/ci.yaml) [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![Discord](https://img.shields.io/discord/980519274600882306)
 
 A [Foundry](https://github.com/foundry-rs/foundry) template to compile and test Huff contracts.
 
