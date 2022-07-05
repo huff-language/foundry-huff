@@ -29,8 +29,20 @@ contract HuffConfig {
     return this;
   }
 
+  /// @notice Checks for huffc binary conflicts
+  function binary_check() public {
+    string[] memory bincheck = new string[](1);
+    bincheck[0] = "./lib/foundry-huff/scripts/binary_check.sh";
+    bytes memory retData = vm.ffi(bincheck);
+    bytes8 first_bytes = retData[0];
+    bool decoded = first_bytes == bytes8(hex"01");
+    require(decoded, "Invalid huffc binary. Run `curl -L get.huff.sh | bash` and `huffup` to fix.");
+  }
+
   /// @notice Deploy the Contract
   function deploy(string memory file) public returns (address) {
+    binary_check();
+
     // Split the file into it's parts
     strings.slice memory s = file.toSlice();
     strings.slice memory delim = "/".toSlice();
