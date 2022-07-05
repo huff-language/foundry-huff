@@ -6,12 +6,13 @@
 #define constant CONSTRUCTOR_ARG_ONE = FREE_STORAGE_POINTER()
 #define constant CONSTRUCTOR_ARG_TWO = FREE_STORAGE_POINTER()
 
+/* Events */
+#define event ArgumentsUpdated(address indexed one, uint256 indexed two)
+
+#define constant ARGUMENTS_TOPIC = 0xd0a6a6b9636b3b1e85120bfc8c36f7bc862769b48e0854deaf8780636a71ce7d
+
 /* Constructor */
 #define macro CONSTRUCTOR() = takes(0) returns (0) {
-  // -------------            --------------------------
-  // | OPERATION |            | STACK (POST-OPERATION) |
-  // -------------            --------------------------
-
   // Copy the first argument into memory
   0x20                        // [size] - byte size to copy
   0x40 codesize sub           // [offset, size] - offset in the code to copy from
@@ -19,20 +20,26 @@
   codecopy                    // []
 
   // Store the first argument in storage
-  0x00 mload                  // [arg]
-  [CONSTRUCTOR_ARG_ONE]       // [CONSTRUCTOR_ARG_ONE, arg]
-  sstore                      // []
+  0x00 mload dup1             // [arg1, arg1]
+  [CONSTRUCTOR_ARG_ONE]       // [CONSTRUCTOR_ARG_ONE, arg1, arg1]
+  sstore                      // [arg1]
 
   // Copy the second argument into memory
-  0x20                        // [size] - byte size to copy
-  0x20 codesize sub           // [offset, size] - offset in the code to copy from
-  0x00                        // [mem, offset, size] - offset in memory to copy to
-  codecopy                    // []
+  0x20                        // [size, arg1] - byte size to copy
+  0x20 codesize sub           // [offset, size, arg1] - offset in the code to copy from
+  0x00                        // [mem, offset, size, arg1] - offset in memory to copy to
+  codecopy                    // [arg1]
 
   // Store the second argument in storage
-  0x00 mload                  // [arg]
-  [CONSTRUCTOR_ARG_TWO]       // [CONSTRUCTOR_ARG_TWO, arg]
-  sstore                      // []
+  0x00 mload dup1             // [arg2, arg2, arg1]
+  [CONSTRUCTOR_ARG_TWO]       // [CONSTRUCTOR_ARG_TWO, arg2, arg2, arg1]
+  sstore                      // [arg2, arg1]
+
+  // Emit the owner updated event
+  swap1                            // [arg1, arg2]
+  [ARGUMENTS_TOPIC]                // [sig, arg1, arg2]
+  0x00 0x00                        // [0, 0, sig, arg1, arg2]
+  log3                             // []
 }
 
 /* First Argument Accessor */

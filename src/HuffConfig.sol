@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.13 <0.9.0;
 
-import "forge-std/console.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {strings} from "stringutils/strings.sol";
 
@@ -29,8 +28,20 @@ contract HuffConfig {
     return this;
   }
 
+  /// @notice Checks for huffc binary conflicts
+  function binary_check() public {
+    string[] memory bincheck = new string[](1);
+    bincheck[0] = "./lib/foundry-huff/scripts/binary_check.sh";
+    bytes memory retData = vm.ffi(bincheck);
+    bytes8 first_bytes = retData[0];
+    bool decoded = first_bytes == bytes8(hex"01");
+    require(decoded, "Invalid huffc binary. Run `curl -L get.huff.sh | bash` and `huffup` to fix.");
+  }
+
   /// @notice Deploy the Contract
   function deploy(string memory file) public returns (address) {
+    binary_check();
+
     // Split the file into it's parts
     strings.slice memory s = file.toSlice();
     strings.slice memory delim = "/".toSlice();
@@ -70,8 +81,6 @@ contract HuffConfig {
     /// @notice compile the Huff contract and return the bytecode
     bytes memory bytecode = vm.ffi(cmds);
     bytes memory concatenated = bytes.concat(bytecode, args);
-    console.logString("HuffDeployer Deployed String:");
-    console.logBytes(concatenated);
 
     // Clean up temp files
     string[] memory cleanup = new string[](2);

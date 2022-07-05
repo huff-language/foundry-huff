@@ -6,6 +6,11 @@
 #define constant CONSTRUCTOR_ARG_ONE = FREE_STORAGE_POINTER()
 #define constant CONSTRUCTOR_ARG_TWO = FREE_STORAGE_POINTER()
 
+/* Events */
+#define event ArgumentsUpdated(address indexed one, uint256 indexed two)
+
+#define constant ARGUMENTS_TOPIC = 0xd0a6a6b9636b3b1e85120bfc8c36f7bc862769b48e0854deaf8780636a71ce7d
+
 /* First Argument Accessor */
 #define macro GET_ARG_ONE() = takes (0) returns (0) {
     [CONSTRUCTOR_ARG_ONE] sload

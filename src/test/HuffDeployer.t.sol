@@ -11,22 +11,22 @@ import {IConstructor} from "./interfaces/IConstructor.sol";
 contract HuffDeployerTest is Test {
     INumber number;
     IConstructor structor;
-    IConstructor chained;
+
+    event ArgumentsUpdated(address indexed one, uint256 indexed two);
 
     function setUp() public {
         number = INumber(HuffDeployer.deploy("test/contracts/Number"));
 
-        // Showcase alignment of address
-        bytes memory first_arg = abi.encode(address(0x420));
-        // abi encoded first_arg should equal the below 32 byte slot
-        // "0000000000000000000000004200000000000000000000000000000000000000"
-
         // Backwards-compatible Constructor creation
+        vm.expectEmit(true, true, true, true);
+        emit ArgumentsUpdated(address(0x420), uint256(0x420));
         structor = IConstructor(HuffDeployer.deploy_with_args(
             "test/contracts/Constructor",
-            bytes.concat(first_arg, abi.encode(uint256(0x420)))
+            bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420)))
         ));
+    }
 
+    function testChaining() public {
         // Defined Constructor
         string memory constructor_macro = "#define macro CONSTRUCTOR() = takes(0) returns (0) {"
             "    // Copy the first argument into memory \n"
@@ -35,37 +35,45 @@ contract HuffDeployerTest is Test {
             "    0x00                        // [mem, offset, size] - offset in memory to copy to \n"
             "    codecopy                    // [] \n"
             "    // Store the first argument in storage\n"
-            "    0x00 mload                  // [arg] \n"
-            "    [CONSTRUCTOR_ARG_ONE]       // [CONSTRUCTOR_ARG_ONE, arg] \n"
-            "    sstore                      // [] \n"
+            "    0x00 mload dup1             // [arg1, arg1] \n"
+            "    [CONSTRUCTOR_ARG_ONE]       // [CONSTRUCTOR_ARG_ONE, arg1, arg1] \n"
+            "    sstore                      // [arg1] \n"
             "    // Copy the second argument into memory \n"
-            "    0x20                        // [size] - byte size to copy \n"
-            "    0x20 codesize sub           // [offset, size] - offset in the code to copy from \n"
-            "    0x00                        // [mem, offset, size] - offset in memory to copy to \n"
-            "    codecopy                    // [] \n"
+            "    0x20                        // [size, arg1] - byte size to copy \n"
+            "    0x20 codesize sub           // [offset, size, arg1] - offset in the code to copy from \n"
+            "    0x00                        // [mem, offset, size, arg1] - offset in memory to copy to \n"
+            "    codecopy                    // [arg1] \n"
             "    // Store the second argument in storage \n"
-            "    0x00 mload                  // [arg] \n"
-            "    [CONSTRUCTOR_ARG_TWO]       // [CONSTRUCTOR_ARG_TWO, arg] \n"
-            "    sstore                      // [] \n"
+            "    0x00 mload dup1             // [arg2, arg2, arg1] \n"
+            "    [CONSTRUCTOR_ARG_TWO]       // [CONSTRUCTOR_ARG_TWO, arg2, arg2, arg1] \n"
+            "    sstore                      // [arg2, arg1] \n"
+            "    // Emit the owner updated event \n"
+            "    swap1                            // [arg1, arg2] \n"
+            "    [ARGUMENTS_TOPIC]                // [sig, arg1, arg2] \n"
+            "    0x00 0x00                        // [0, 0, sig, arg1, arg2] \n"
+            "    log3                             // [] \n"
             "}";
 
         // New pattern
-        chained = IConstructor(
+        vm.expectEmit(true, true, true, true);
+        emit ArgumentsUpdated(address(0x420), uint256(0x420));
+        IConstructor chained = IConstructor(
             HuffDeployer.config()
-            .with_args(bytes.concat(first_arg, abi.encode(uint256(0x420))))
+            .with_args(bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420))))
             .with_code(constructor_macro)
             .deploy("test/contracts/NoConstructor")
         );
+
+        assertEq(address(0x420), chained.getArgOne());
+        assertEq(uint256(0x420), chained.getArgTwo());
     }
 
     function testArgOne() public {
         assertEq(address(0x420), structor.getArgOne());
-        assertEq(address(0x420), chained.getArgOne());
     }
 
     function testArgTwo() public {
         assertEq(uint256(0x420), structor.getArgTwo());
-        assertEq(uint256(0x420), chained.getArgTwo());
     }
 
     function testBytecode() public {
