@@ -11,7 +11,6 @@ import {IConstructor} from "./interfaces/IConstructor.sol";
 contract HuffDeployerTest is Test {
     INumber number;
     IConstructor structor;
-    IConstructor chained;
 
     event ArgumentsUpdated(address indexed one, uint256 indexed two);
 
@@ -25,7 +24,9 @@ contract HuffDeployerTest is Test {
             "test/contracts/Constructor",
             bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420)))
         ));
+    }
 
+    function testChaining() public {
         // Defined Constructor
         string memory constructor_macro = "#define macro CONSTRUCTOR() = takes(0) returns (0) {"
             "    // Copy the first argument into memory \n"
@@ -48,7 +49,7 @@ contract HuffDeployerTest is Test {
             "    sstore                      // [arg2, arg1] \n"
             "    // Emit the owner updated event \n"
             "    swap1                            // [arg1, arg2] \n"
-            "    __EVENT_HASH(ArgumentsUpdated)   // [sig, arg1, arg2] \n"
+            "    [ARGUMENTS_TOPIC]                // [sig, arg1, arg2] \n"
             "    0x00 0x00                        // [0, 0, sig, arg1, arg2] \n"
             "    log3                             // [] \n"
             "}";
@@ -56,22 +57,23 @@ contract HuffDeployerTest is Test {
         // New pattern
         vm.expectEmit(true, true, true, true);
         emit ArgumentsUpdated(address(0x420), uint256(0x420));
-        chained = IConstructor(
+        IConstructor chained = IConstructor(
             HuffDeployer.config()
             .with_args(bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420))))
             .with_code(constructor_macro)
             .deploy("test/contracts/NoConstructor")
         );
+
+        assertEq(address(0x420), chained.getArgOne());
+        assertEq(uint256(0x420), chained.getArgTwo());
     }
 
     function testArgOne() public {
         assertEq(address(0x420), structor.getArgOne());
-        assertEq(address(0x420), chained.getArgOne());
     }
 
     function testArgTwo() public {
         assertEq(uint256(0x420), structor.getArgTwo());
-        assertEq(uint256(0x420), chained.getArgTwo());
     }
 
     function testBytecode() public {

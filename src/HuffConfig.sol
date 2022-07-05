@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.13 <0.9.0;
 
-import "forge-std/console.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {strings} from "stringutils/strings.sol";
 
@@ -82,8 +81,6 @@ contract HuffConfig {
     /// @notice compile the Huff contract and return the bytecode
     bytes memory bytecode = vm.ffi(cmds);
     bytes memory concatenated = bytes.concat(bytecode, args);
-    // console.logString("HuffDeployer Deployed String:");
-    // console.logBytes(concatenated);
 
     // Clean up temp files
     string[] memory cleanup = new string[](2);

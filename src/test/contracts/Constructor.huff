@@ -9,6 +9,8 @@
 /* Events */
 #define event ArgumentsUpdated(address indexed one, uint256 indexed two)
 
+#define constant ARGUMENTS_TOPIC = 0xd0a6a6b9636b3b1e85120bfc8c36f7bc862769b48e0854deaf8780636a71ce7d
+
 /* Constructor */
 #define macro CONSTRUCTOR() = takes(0) returns (0) {
   // Copy the first argument into memory
@@ -35,7 +37,7 @@
 
   // Emit the owner updated event
   swap1                            // [arg1, arg2]
-  __EVENT_HASH(ArgumentsUpdated)   // [sig, arg1, arg2]
+  [ARGUMENTS_TOPIC]                // [sig, arg1, arg2]
   0x00 0x00                        // [0, 0, sig, arg1, arg2]
   log3                             // []
 }
