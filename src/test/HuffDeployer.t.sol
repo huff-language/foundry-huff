@@ -18,17 +18,12 @@ contract HuffDeployerTest is Test {
     function setUp() public {
         number = INumber(HuffDeployer.deploy("test/contracts/Number"));
 
-        // Showcase alignment of address
-        bytes memory first_arg = abi.encode(address(0x420));
-        // abi encoded first_arg should equal the below 32 byte slot
-        // "0000000000000000000000004200000000000000000000000000000000000000"
-
         // Backwards-compatible Constructor creation
         vm.expectEmit(true, true, true, true);
         emit ArgumentsUpdated(address(0x420), uint256(0x420));
         structor = IConstructor(HuffDeployer.deploy_with_args(
             "test/contracts/Constructor",
-            bytes.concat(first_arg, abi.encode(uint256(0x420)))
+            bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420)))
         ));
 
         // Defined Constructor
@@ -63,7 +58,7 @@ contract HuffDeployerTest is Test {
         emit ArgumentsUpdated(address(0x420), uint256(0x420));
         chained = IConstructor(
             HuffDeployer.config()
-            .with_args(bytes.concat(first_arg, abi.encode(uint256(0x420))))
+            .with_args(bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420))))
             .with_code(constructor_macro)
             .deploy("test/contracts/NoConstructor")
         );

@@ -24,5 +24,8 @@ jobs:
       - name: Print the Bytecode for fun
         run: huffc -b src/test/contracts/Number.huff
 
+      - name: Print the Scripts
+        run: ls -lsa lib/foundry-huff/scripts/
+
       - name: Run Tests
         run: forge test -vvv
