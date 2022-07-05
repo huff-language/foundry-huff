@@ -82,8 +82,8 @@ contract HuffConfig {
     /// @notice compile the Huff contract and return the bytecode
     bytes memory bytecode = vm.ffi(cmds);
     bytes memory concatenated = bytes.concat(bytecode, args);
-    console.logString("HuffDeployer Deployed String:");
-    console.logBytes(concatenated);
+    // console.logString("HuffDeployer Deployed String:");
+    // console.logBytes(concatenated);
 
     // Clean up temp files
     string[] memory cleanup = new string[](2);
