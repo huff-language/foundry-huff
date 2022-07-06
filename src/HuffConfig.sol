@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.13 <0.9.0;
 
-import "forge-std/console.sol";
+// import "forge-std/console.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {strings} from "stringutils/strings.sol";
 
@@ -39,7 +39,7 @@ contract HuffConfig {
     require(decoded, "Invalid huffc binary. Run `curl -L get.huff.sh | bash` and `huffup` to fix.");
   }
 
-  function bytesToString(bytes memory x) internal returns (string memory) {
+  function bytesToString(bytes memory x) internal pure returns (string memory) {
     string memory result;
     for (uint j = 0; j < x.length; j++) {
       result = string.concat(result, string(abi.encodePacked(uint8(x[j]) % 26 + 97)));
@@ -47,6 +47,13 @@ contract HuffConfig {
     return result;
   }
 
+  function bytesToString(bytes32 x) internal pure returns (string memory) {
+    string memory result;
+    for (uint j = 0; j < x.length; j++) {
+      result = string.concat(result, string(abi.encodePacked(uint8(x[j]) % 26 + 97)));
+    }
+    return result;
+  }
 
   /// @notice Deploy the Contract
   function deploy(string memory file) public returns (address) {
@@ -64,7 +71,9 @@ contract HuffConfig {
     string[] memory time = new string[](1);
     time[0] = "./lib/foundry-huff/scripts/systime.sh";
     bytes memory retData = vm.ffi(time);
-    string memory systime = bytesToString(retData);
+    // console.logBytes(retData);
+    string memory systime = bytesToString(keccak256(abi.encode(bytes32(retData))));
+    // console.logString(systime);
 
     // Re-concatenate the file with a "__TEMP__" prefix
     string memory tempFile = parts[0];
