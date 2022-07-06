@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.13 <0.9.0;
 
+import "forge-std/console.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {strings} from "stringutils/strings.sol";
 
@@ -52,10 +53,14 @@ contract HuffConfig {
 
     // Re-concatenate the file with a "__TEMP__" prefix
     string memory tempFile = parts[0];
-    for (uint i = 1; i < parts.length - 1; i++) {
-      tempFile = string.concat(tempFile, "/", parts[i]);
+    if (parts.length <= 1) {
+      tempFile = string.concat("__TEMP__", tempFile);
+    } else {
+      for (uint i = 1; i < parts.length - 1; i++) {
+        tempFile = string.concat(tempFile, "/", parts[i]);
+      }
+      tempFile = string.concat(tempFile, "/", "__TEMP__", parts[parts.length - 1]);
     }
-    tempFile = string.concat(tempFile, "/", "__TEMP__", parts[parts.length - 1]);
 
     // Paste the code in a new temp file
     string[] memory create_cmds = new string[](3);
