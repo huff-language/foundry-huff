@@ -39,6 +39,15 @@ contract HuffConfig {
     require(decoded, "Invalid huffc binary. Run `curl -L get.huff.sh | bash` and `huffup` to fix.");
   }
 
+  function bytesToString(bytes memory x) internal returns (string memory) {
+    string memory result;
+    for (uint j = 0; j < x.length; j++) {
+      result = string.concat(result, string(abi.encodePacked(uint8(x[j]) % 26 + 97)));
+    }
+    return result;
+  }
+
+
   /// @notice Deploy the Contract
   function deploy(string memory file) public returns (address) {
     binary_check();
@@ -51,15 +60,21 @@ contract HuffConfig {
       parts[i] = s.split(delim).toString();
     }
 
+    // Get the system time with our script
+    string[] memory time = new string[](1);
+    time[0] = "./lib/foundry-huff/scripts/systime.sh";
+    bytes memory retData = vm.ffi(time);
+    string memory systime = bytesToString(retData);
+
     // Re-concatenate the file with a "__TEMP__" prefix
     string memory tempFile = parts[0];
     if (parts.length <= 1) {
-      tempFile = string.concat("__TEMP__", tempFile);
+      tempFile = string.concat("__TEMP__", systime, tempFile);
     } else {
       for (uint i = 1; i < parts.length - 1; i++) {
         tempFile = string.concat(tempFile, "/", parts[i]);
       }
-      tempFile = string.concat(tempFile, "/", "__TEMP__", parts[parts.length - 1]);
+      tempFile = string.concat(tempFile, "/", "__TEMP__", systime, parts[parts.length - 1]);
     }
 
     // Paste the code in a new temp file

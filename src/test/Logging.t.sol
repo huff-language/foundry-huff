@@ -15,8 +15,6 @@ contract LoggingTest is Test {
   event LogFour(address indexed a, uint256 indexed b, bytes32 indexed c);
   event Extended(address indexed a, uint256 indexed b, bytes32 indexed h1, bytes32 h2, bytes32 two);
 
-  function setUp() public {}
-
   function testLoggingWithArgs() public {
     // Ignore the second topic (address) since the internal HuffConfig is the msg.sender
     vm.expectEmit(false, true, true, true);
@@ -42,7 +40,7 @@ contract LoggingTest is Test {
   }
 
   function testConfigLogging() public {
-    HuffConfig config = HuffDeployer.config();
+    HuffConfig config = HuffDeployer.config().with_args(abi.encode(address(0x420)));
     vm.expectEmit(true, true, true, true);
     emit LogOne();
     emit LogTwo(address(config));
