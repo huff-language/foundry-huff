@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.13 <0.9.0;
 
-// import "forge-std/console.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {strings} from "stringutils/strings.sol";
 
@@ -39,14 +38,6 @@ contract HuffConfig {
     require(decoded, "Invalid huffc binary. Run `curl -L get.huff.sh | bash` and `huffup` to fix.");
   }
 
-  function bytesToString(bytes memory x) internal pure returns (string memory) {
-    string memory result;
-    for (uint j = 0; j < x.length; j++) {
-      result = string.concat(result, string(abi.encodePacked(uint8(x[j]) % 26 + 97)));
-    }
-    return result;
-  }
-
   function bytesToString(bytes32 x) internal pure returns (string memory) {
     string memory result;
     for (uint j = 0; j < x.length; j++) {
@@ -69,26 +60,24 @@ contract HuffConfig {
 
     // Get the system time with our script
     string[] memory time = new string[](1);
-    time[0] = "./lib/foundry-huff/scripts/systime.sh";
+    time[0] = "./lib/foundry-huff/scripts/rand_bytes.sh";
     bytes memory retData = vm.ffi(time);
-    // console.logBytes(retData);
-    string memory systime = bytesToString(keccak256(abi.encode(bytes32(retData))));
-    // console.logString(systime);
+    string memory rand_bytes = bytesToString(keccak256(abi.encode(bytes32(retData))));
 
     // Re-concatenate the file with a "__TEMP__" prefix
     string memory tempFile = parts[0];
     if (parts.length <= 1) {
-      tempFile = string.concat("__TEMP__", systime, tempFile);
+      tempFile = string.concat("__TEMP__", rand_bytes, tempFile);
     } else {
       for (uint i = 1; i < parts.length - 1; i++) {
         tempFile = string.concat(tempFile, "/", parts[i]);
       }
-      tempFile = string.concat(tempFile, "/", "__TEMP__", systime, parts[parts.length - 1]);
+      tempFile = string.concat(tempFile, "/", "__TEMP__", rand_bytes, parts[parts.length - 1]);
     }
 
     // Paste the code in a new temp file
     string[] memory create_cmds = new string[](3);
-    // create_cmds[0] = "$(find . -name \"file_writer.sh\")";
+    // TODO: create_cmds[0] = "$(find . -name \"file_writer.sh\")";
     create_cmds[0] = "./lib/foundry-huff/scripts/file_writer.sh";
     create_cmds[1] = string.concat("src/", tempFile, ".huff");
     create_cmds[2] = string.concat(code, "\n");
