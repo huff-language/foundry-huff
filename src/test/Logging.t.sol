@@ -19,7 +19,7 @@ contract LoggingTest is Test {
 
   function testLoggingWithArgs() public {
     // Ignore the second topic (address) since the internal HuffConfig is the msg.sender
-    vm.expectEmit(true, false, true, true);
+    vm.expectEmit(false, true, true, true);
     emit LogOne();
     emit LogTwo(address(0));
     emit LogThree(address(0), 0);
@@ -32,7 +32,7 @@ contract LoggingTest is Test {
   }
 
   function testLoggingWithDeploy() public {
-    vm.expectEmit(true, false, true, true);
+    vm.expectEmit(false, true, true, true);
     emit LogOne();
     emit LogTwo(address(0));
     emit LogThree(address(0), 0);
