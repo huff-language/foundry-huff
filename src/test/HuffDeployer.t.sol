@@ -85,16 +85,33 @@ contract HuffDeployerTest is Test {
     }
 
     function testConstantOverride() public {
+        // Test address constant
+        address a = 0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF;
         address deployed = HuffDeployer.config()
-            .with_constant("a", "0xa57b")
+            .with_addr_constant("a", a)
             .with_constant("b", "0x420")
             .deploy("test/contracts/ConstOverride");
-        assertEq(getCode(deployed), hex"61a57b610420");
+        assertEq(getCode(deployed), hex"73DeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF610420");
 
+        // Test uint constant
         address deployed_2 = HuffDeployer.config()
+            .with_uint_constant("a", 32)
             .with_constant("b", "0x420")
             .deploy("test/contracts/ConstOverride");
-        assertEq(getCode(deployed_2), hex"6001610420");
+        assertEq(getCode(deployed_2), hex"6020610420");
+
+        // Test bytes32 constant
+        address deployed_3 = HuffDeployer.config()
+            .with_bytes32_constant("a", bytes32(hex"01"))
+            .with_constant("b", "0x420")
+            .deploy("test/contracts/ConstOverride");
+        assertEq(getCode(deployed_3), hex"7f0100000000000000000000000000000000000000000000000000000000000000610420");
+
+        // Keep default "a" value and assign "b", which is unassigned in "ConstOverride.huff"
+        address deployed_4 = HuffDeployer.config()
+            .with_constant("b", "0x420")
+            .deploy("test/contracts/ConstOverride");
+        assertEq(getCode(deployed_4), hex"6001610420");
     }
 
     function getCode(address who) internal view returns (bytes memory o_code) {

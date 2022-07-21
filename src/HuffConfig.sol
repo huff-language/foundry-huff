@@ -37,13 +37,41 @@ contract HuffConfig {
         return this;
     }
 
-    /// @notice sets a constant to a bytes32 value in the current compilation environment
-    /// TODO: Create other functions to accept `bytes32`, `address`, `uint`, etc.
+    /// @notice sets a constant to a bytes memory value in the current compilation environment
+    /// @dev The `value` string must contain a valid hex number that is <= 32 bytes
+    ///      i.e. "0x01", "0xa57b", "0x0de0b6b3a7640000", etc. 
     function with_constant(
         string memory key,
         string memory value
     ) public returns (HuffConfig) {
         const_overrides.push(Constant(key, value));
+        return this;
+    }
+
+    /// @notice sets a constant to an address value in the current compilation environment
+    function with_addr_constant(
+        string memory key,
+        address value
+    ) public returns (HuffConfig) {
+        const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value))));
+        return this;
+    }
+
+    /// @notice sets a constant to a bytes32 value in the current compilation environment
+    function with_bytes32_constant(
+        string memory key,
+        bytes32 value
+    ) public returns (HuffConfig) {
+        const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value))));
+        return this;
+    }
+
+    /// @notice sets a constant to a uint256 value in the current compilation environment
+    function with_uint_constant(
+        string memory key,
+        uint256 value
+    ) public returns (HuffConfig) {
+        const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value))));
         return this;
     }
 
@@ -60,7 +88,7 @@ contract HuffConfig {
         );
     }
 
-    function bytesToString(bytes32 x) internal pure returns (string memory) {
+    function bytes32ToString(bytes32 x) internal pure returns (string memory) {
         string memory result;
         for (uint256 j = 0; j < x.length; j++) {
             result = string.concat(
@@ -68,6 +96,19 @@ contract HuffConfig {
             );
         }
         return result;
+    }
+
+    function bytesToString(bytes memory data) public pure returns(string memory) {
+        bytes memory alphabet = "0123456789abcdef";
+
+        bytes memory str = new bytes(2 + data.length * 2);
+        str[0] = "0";
+        str[1] = "x";
+        for (uint i = 0; i < data.length; i++) {
+            str[2+i*2] = alphabet[uint(uint8(data[i] >> 4))];
+            str[3+i*2] = alphabet[uint(uint8(data[i] & 0x0f))];
+        }
+        return string(str);
     }
 
     /// @notice Deploy the Contract
@@ -87,7 +128,7 @@ contract HuffConfig {
         time[0] = "./lib/foundry-huff/scripts/rand_bytes.sh";
         bytes memory retData = vm.ffi(time);
         string memory rand_bytes =
-            bytesToString(keccak256(abi.encode(bytes32(retData))));
+            bytes32ToString(keccak256(abi.encode(bytes32(retData))));
 
         // Re-concatenate the file with a "__TEMP__" prefix
         string memory tempFile = parts[0];
