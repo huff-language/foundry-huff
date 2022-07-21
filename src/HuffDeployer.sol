@@ -21,7 +21,10 @@ library HuffDeployer {
     /// @param fileName - The file name of the Huff contract. For example, the file name for "SimpleStore.huff" is "SimpleStore"
     /// @param args - Constructor Args to append to the bytecode
     /// @return The address that the contract was deployed to
-    function deploy_with_args(string memory fileName, bytes memory args) internal returns (address) {
+    function deploy_with_args(
+        string memory fileName,
+        bytes memory args
+    ) internal returns (address) {
         return config().with_args(args).deploy(fileName);
     }
 
@@ -29,7 +32,10 @@ library HuffDeployer {
     /// @param fileName - The file name of the Huff contract. For example, the file name for "SimpleStore.huff" is "SimpleStore"
     /// @param code - Code to append to the file source code (e.g. a constructor macro to make the contract instantiable)
     /// @return The address that the contract was deployed to
-    function deploy_with_code(string memory fileName, string memory code) internal returns (address) {
+    function deploy_with_code(
+        string memory fileName, 
+        string memory code
+    ) internal returns (address) {
         return config().with_code(code).deploy(fileName);
     }
 
@@ -38,7 +44,11 @@ library HuffDeployer {
     /// @param code - Code to append to the file source code (e.g. a constructor macro to make the contract instantiable)
     /// @param args - Constructor Args to append to the bytecode
     /// @return The address that the contract was deployed to
-    function deploy_with_code_args(string memory fileName, string memory code, bytes memory args) internal returns (address) {
+    function deploy_with_code_args(
+        string memory fileName,
+        string memory code,
+        bytes memory args
+    ) internal returns (address) {
         return config().with_code(code).with_args(args).deploy(fileName);
     }
 }

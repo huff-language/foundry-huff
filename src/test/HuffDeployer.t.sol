@@ -20,15 +20,18 @@ contract HuffDeployerTest is Test {
         // Backwards-compatible Constructor creation
         vm.expectEmit(true, true, true, true);
         emit ArgumentsUpdated(address(0x420), uint256(0x420));
-        structor = IConstructor(HuffDeployer.deploy_with_args(
-            "test/contracts/Constructor",
-            bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420)))
-        ));
+        structor = IConstructor(
+            HuffDeployer.deploy_with_args(
+                "test/contracts/Constructor",
+                bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420)))
+            )
+        );
     }
 
     function testChaining() public {
         // Defined Constructor
-        string memory constructor_macro = "#define macro CONSTRUCTOR() = takes(0) returns (0) {"
+        string memory constructor_macro =
+            "#define macro CONSTRUCTOR() = takes(0) returns (0) {"
             "    // Copy the first argument into memory \n"
             "    0x20                        // [size] - byte size to copy \n"
             "    0x40 codesize sub           // [offset, size] - offset in the code to copy from\n "
@@ -51,17 +54,15 @@ contract HuffDeployerTest is Test {
             "    swap1                            // [arg1, arg2] \n"
             "    [ARGUMENTS_TOPIC]                // [sig, arg1, arg2] \n"
             "    0x00 0x00                        // [0, 0, sig, arg1, arg2] \n"
-            "    log3                             // [] \n"
-            "}";
+            "    log3                             // [] \n" "}";
 
         // New pattern
         vm.expectEmit(true, true, true, true);
         emit ArgumentsUpdated(address(0x420), uint256(0x420));
         IConstructor chained = IConstructor(
-            HuffDeployer.config()
-            .with_args(bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420))))
-            .with_code(constructor_macro)
-            .deploy("test/contracts/NoConstructor")
+            HuffDeployer.config().with_args(
+                bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420)))
+            ).with_code(constructor_macro).deploy("test/contracts/NoConstructor")
         );
 
         assertEq(address(0x420), chained.getArgOne());
@@ -77,8 +78,23 @@ contract HuffDeployerTest is Test {
     }
 
     function testBytecode() public {
-        bytes memory b = bytes(hex"60003560e01c80633fb5c1cb1461001c578063f2c9ecd814610023575b6004356000555b60005460005260206000f3");
+        bytes memory b = bytes(
+            hex"60003560e01c80633fb5c1cb1461001c578063f2c9ecd814610023575b6004356000555b60005460005260206000f3"
+        );
         assertEq(getCode(address(number)), b);
+    }
+
+    function testConstantOverride() public {
+        address deployed = HuffDeployer.config()
+            .with_constant("a", "0xa57b")
+            .with_constant("b", "0x420")
+            .deploy("test/contracts/ConstOverride");
+        assertEq(getCode(deployed), hex"61a57b610420");
+
+        address deployed_2 = HuffDeployer.config()
+            .with_constant("b", "0x420")
+            .deploy("test/contracts/ConstOverride");
+        assertEq(getCode(deployed_2), hex"6001610420");
     }
 
     function getCode(address who) internal view returns (bytes memory o_code) {
