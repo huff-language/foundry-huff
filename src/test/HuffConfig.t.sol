@@ -20,6 +20,11 @@ contract HuffConfigTest is Test {
         assertEq(config.args(), some);
     }
 
+    function testWithValue(uint256 value) public {
+        config.with_value(value);
+        assertEq(config.value(), value);
+    }
+
     function testWithCode(string memory code) public {
         config.with_code(code);
         assertEq(config.code(), code);

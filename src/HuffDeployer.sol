@@ -19,6 +19,17 @@ library HuffDeployer {
 
     /// @notice Compiles a Huff contract and returns the address that the contract was deployeod to
     /// @param fileName - The file name of the Huff contract. For example, the file name for "SimpleStore.huff" is "SimpleStore"
+    /// @param value - Value to deploy with
+    /// @return The address that the contract was deployed to
+    function deploy_with_value(
+        string memory fileName,
+        uint256 value
+    ) internal returns (address) {
+        return config().with_value(value).deploy(fileName);
+    }
+
+    /// @notice Compiles a Huff contract and returns the address that the contract was deployeod to
+    /// @param fileName - The file name of the Huff contract. For example, the file name for "SimpleStore.huff" is "SimpleStore"
     /// @param args - Constructor Args to append to the bytecode
     /// @return The address that the contract was deployed to
     function deploy_with_args(

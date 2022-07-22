@@ -22,6 +22,9 @@ contract HuffConfig {
     /// @notice arguments to append to the bytecode
     bytes public args;
 
+    /// @notice value to deploy the contract with
+    uint256 public value;
+
     /// @notice constant overrides for the current compilation environment
     Constant[] public const_overrides;
 
@@ -34,6 +37,12 @@ contract HuffConfig {
     /// @notice sets the arguments to be appended to the bytecode
     function with_args(bytes memory aargs) public returns (HuffConfig) {
         args = aargs;
+        return this;
+    }
+
+    /// @notice sets the amount of wei to deploy the contract with
+    function with_value(uint256 _value) public returns (HuffConfig) {
+        value = _value;
         return this;
     }
 
@@ -112,7 +121,7 @@ contract HuffConfig {
     }
 
     /// @notice Deploy the Contract
-    function deploy(string memory file) public returns (address) {
+    function deploy(string memory file) public payable returns (address) {
         binary_check();
 
         // Split the file into it's parts
@@ -188,7 +197,8 @@ contract HuffConfig {
         /// @notice deploy the bytecode with the create instruction
         address deployedAddress;
         assembly {
-          deployedAddress := create(0, add(concatenated, 0x20), mload(concatenated))
+            let val := sload(value.slot)
+            deployedAddress := create(val, add(concatenated, 0x20), mload(concatenated))
         }
 
         /// @notice check that the deployment was successful
