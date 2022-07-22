@@ -121,7 +121,7 @@ contract HuffConfig {
     }
 
     /// @notice Deploy the Contract
-    function deploy(string memory file) public returns (address) {
+    function deploy(string memory file) public payable returns (address) {
         binary_check();
 
         // Split the file into it's parts

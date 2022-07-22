@@ -84,6 +84,13 @@ contract HuffDeployerTest is Test {
         assertEq(getCode(address(number)), b);
     }
 
+    function testWithValueDeployment() public {
+        uint256 value = 1 ether;
+        HuffDeployer.config()
+            .with_value(value)
+            .deploy{value: value}("test/contracts/ConstructorNeedsValue");
+    }
+
     function testConstantOverride() public {
         // Test address constant
         address a = 0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF;
