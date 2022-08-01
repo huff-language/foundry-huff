@@ -6,13 +6,9 @@ import {HuffConfig} from "./HuffConfig.sol";
 
 library HuffDeployer {
 
-    Vm constant vm = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
-
     /// @notice Create a new huff config
     function config() public returns (HuffConfig) {
-        vm.stopBroadcast();
         return new HuffConfig();
-        // vm.startBroadcast();
     }
 
     /// @notice Compiles a Huff contract and returns the address that the contract was deployeod to
