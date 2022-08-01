@@ -89,7 +89,7 @@ contract HuffConfig {
 
     /// @notice sets whether to broadcast the deployment
     function set_broadcast(bool broadcast) public returns (HuffConfig) {
-        should_broadcast = true;
+        should_broadcast = broadcast;
         return this;
     }
 
