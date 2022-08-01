@@ -25,6 +25,9 @@ contract HuffConfig {
     /// @notice value to deploy the contract with
     uint256 public value;
 
+    /// @notice whether to broadcast the deployment tx
+    bool public broadcast;
+
     /// @notice constant overrides for the current compilation environment
     Constant[] public const_overrides;
 
@@ -208,5 +211,10 @@ contract HuffConfig {
 
         /// @notice return the address that the contract was deployed to
         return deployedAddress;
+    }
+
+    function broadcast(string memory file) public payable returns (address) {
+        vm.broadcast();
+        deploy(file);
     }
 }
