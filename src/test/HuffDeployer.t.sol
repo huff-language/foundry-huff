@@ -7,6 +7,7 @@ import {HuffConfig} from "../HuffConfig.sol";
 import {HuffDeployer} from "../HuffDeployer.sol";
 import {INumber} from "./interfaces/INumber.sol";
 import {IConstructor} from "./interfaces/IConstructor.sol";
+import {IRememberCreator} from "./interfaces/IRememberCreator.sol";
 
 contract HuffDeployerTest is Test {
     INumber number;
@@ -141,5 +142,21 @@ contract HuffDeployerTest is Test {
     function testSet(uint256 num) public {
         number.setNumber(num);
         assertEq(num, number.getNumber());
+    }
+
+    function testConstructorDefaultCaller() public {
+        HuffConfig config = HuffDeployer.config();
+        IRememberCreator rememberer = IRememberCreator(config.deploy("test/contracts/RememberCreator"));
+        assertEq(rememberer.CREATOR(), address(config));
+    }
+
+    function testConstructorCaller(address deployer) public {
+        IRememberCreator rememberer = IRememberCreator(
+            HuffDeployer
+                .config()
+                .with_deployer(deployer)
+                .deploy("test/contracts/RememberCreator")
+        );
+        assertEq(rememberer.CREATOR(), deployer);
     }
 }
