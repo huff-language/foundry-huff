@@ -150,7 +150,7 @@ contract HuffDeployerTest is Test {
         assertEq(rememberer.CREATOR(), address(config));
     }
 
-    function testConstructorCaller(address deployer) public {
+    function runTestConstructorCaller(address deployer) public {
         IRememberCreator rememberer = IRememberCreator(
             HuffDeployer
                 .config()
@@ -158,5 +158,13 @@ contract HuffDeployerTest is Test {
                 .deploy("test/contracts/RememberCreator")
         );
         assertEq(rememberer.CREATOR(), deployer);
+    }
+
+    // @dev fuzzed test too slow, random examples and address(0) chosen
+    function testConstructorCaller() public {
+        runTestConstructorCaller(address(uint160(uint256(keccak256("random addr 1")))));
+        runTestConstructorCaller(address(uint160(uint256(keccak256("random addr 2")))));
+        runTestConstructorCaller(address(0));
+        runTestConstructorCaller(address(uint160(0x1000)));
     }
 }
