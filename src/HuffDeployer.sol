@@ -18,8 +18,11 @@ library HuffDeployer {
         return config().deploy(fileName);
     }
 
-    function broadcast(string memory filename) internal returns (address) {
-        return config().set_broadcast(true).deploy(filename);
+    /// @notice Compiles a Huff contract and returns the address that the contract was deployeod to
+    /// @param fileName - The file name of the Huff contract. For example, the file name for "SimpleStore.huff" is "SimpleStore"
+    /// @return The address that the contract was deployed to
+    function broadcast(string memory fileName) internal returns (address) {
+        return config().set_broadcast(true).deploy(fileName);
     }
 
     /// @notice Compiles a Huff contract and returns the address that the contract was deployeod to
