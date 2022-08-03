@@ -25,6 +25,9 @@ contract HuffConfig {
     /// @notice value to deploy the contract with
     uint256 public value;
 
+    /// @notice whether to broadcast the deployment tx
+    bool public should_broadcast;
+
     /// @notice constant overrides for the current compilation environment
     Constant[] public const_overrides;
 
@@ -81,6 +84,12 @@ contract HuffConfig {
         uint256 value
     ) public returns (HuffConfig) {
         const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value))));
+        return this;
+    }
+
+    /// @notice sets whether to broadcast the deployment
+    function set_broadcast(bool broadcast) public returns (HuffConfig) {
+        should_broadcast = broadcast;
         return this;
     }
 
@@ -196,6 +205,7 @@ contract HuffConfig {
 
         /// @notice deploy the bytecode with the create instruction
         address deployedAddress;
+        if (should_broadcast) vm.broadcast();
         assembly {
             let val := sload(value.slot)
             deployedAddress := create(val, add(concatenated, 0x20), mload(concatenated))

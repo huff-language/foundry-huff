@@ -39,4 +39,10 @@ contract HuffConfigTest is Test {
         assertEq(key, k);
         assertEq(value, v);
     }
+
+    function testSetBroadcast(bool broadcast) public {
+        config.set_broadcast(broadcast);
+        bool b = config.should_broadcast();
+        assertEq(b, broadcast);
+    }
 }
