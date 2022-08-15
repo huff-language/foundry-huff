@@ -54,36 +54,36 @@ contract HuffConfig {
     ///      i.e. "0x01", "0xa57b", "0x0de0b6b3a7640000", etc. 
     function with_constant(
         string memory key,
-        string memory value
+        string memory value_
     ) public returns (HuffConfig) {
-        const_overrides.push(Constant(key, value));
+        const_overrides.push(Constant(key, value_));
         return this;
     }
 
     /// @notice sets a constant to an address value in the current compilation environment
     function with_addr_constant(
         string memory key,
-        address value
+        address value_
     ) public returns (HuffConfig) {
-        const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value))));
+        const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value_))));
         return this;
     }
 
     /// @notice sets a constant to a bytes32 value in the current compilation environment
     function with_bytes32_constant(
         string memory key,
-        bytes32 value
+        bytes32 value_
     ) public returns (HuffConfig) {
-        const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value))));
+        const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value_))));
         return this;
     }
 
     /// @notice sets a constant to a uint256 value in the current compilation environment
     function with_uint_constant(
         string memory key,
-        uint256 value
+        uint256 value_
     ) public returns (HuffConfig) {
-        const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value))));
+        const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value_))));
         return this;
     }
 
