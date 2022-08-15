@@ -32,14 +32,14 @@ contract HuffConfig {
     Constant[] public const_overrides;
 
     /// @notice sets the code to be appended to the source file
-    function with_code(string memory acode) public returns (HuffConfig) {
-        code = acode;
+    function with_code(string memory code_) public returns (HuffConfig) {
+        code = code_;
         return this;
     }
 
     /// @notice sets the arguments to be appended to the bytecode
-    function with_args(bytes memory aargs) public returns (HuffConfig) {
-        args = aargs;
+    function with_args(bytes memory args_) public returns (HuffConfig) {
+        args = args_;
         return this;
     }
 
