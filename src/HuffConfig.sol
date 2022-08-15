@@ -44,8 +44,8 @@ contract HuffConfig {
     }
 
     /// @notice sets the amount of wei to deploy the contract with
-    function with_value(uint256 _value) public returns (HuffConfig) {
-        value = _value;
+    function with_value(uint256 value_) public returns (HuffConfig) {
+        value = value_;
         return this;
     }
 
