@@ -32,20 +32,20 @@ contract HuffConfig {
     Constant[] public const_overrides;
 
     /// @notice sets the code to be appended to the source file
-    function with_code(string memory acode) public returns (HuffConfig) {
-        code = acode;
+    function with_code(string memory code_) public returns (HuffConfig) {
+        code = code_;
         return this;
     }
 
     /// @notice sets the arguments to be appended to the bytecode
-    function with_args(bytes memory aargs) public returns (HuffConfig) {
-        args = aargs;
+    function with_args(bytes memory args_) public returns (HuffConfig) {
+        args = args_;
         return this;
     }
 
     /// @notice sets the amount of wei to deploy the contract with
-    function with_value(uint256 _value) public returns (HuffConfig) {
-        value = _value;
+    function with_value(uint256 value_) public returns (HuffConfig) {
+        value = value_;
         return this;
     }
 
@@ -54,36 +54,36 @@ contract HuffConfig {
     ///      i.e. "0x01", "0xa57b", "0x0de0b6b3a7640000", etc. 
     function with_constant(
         string memory key,
-        string memory value
+        string memory value_
     ) public returns (HuffConfig) {
-        const_overrides.push(Constant(key, value));
+        const_overrides.push(Constant(key, value_));
         return this;
     }
 
     /// @notice sets a constant to an address value in the current compilation environment
     function with_addr_constant(
         string memory key,
-        address value
+        address value_
     ) public returns (HuffConfig) {
-        const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value))));
+        const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value_))));
         return this;
     }
 
     /// @notice sets a constant to a bytes32 value in the current compilation environment
     function with_bytes32_constant(
         string memory key,
-        bytes32 value
+        bytes32 value_
     ) public returns (HuffConfig) {
-        const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value))));
+        const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value_))));
         return this;
     }
 
     /// @notice sets a constant to a uint256 value in the current compilation environment
     function with_uint_constant(
         string memory key,
-        uint256 value
+        uint256 value_
     ) public returns (HuffConfig) {
-        const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value))));
+        const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value_))));
         return this;
     }
 
