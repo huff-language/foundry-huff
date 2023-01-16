@@ -112,7 +112,9 @@ contract HuffConfig {
         return string(str);
     }
 
-    function createTempFile(string memory file) internal returns (string memory tempFile) {
+    function creationCode(string memory file) public payable returns (bytes memory bytecode) {
+        binary_check();
+
         // Split the file into its parts
         strings.slice memory s = file.toSlice();
         strings.slice memory delim = "/".toSlice();
@@ -128,7 +130,7 @@ contract HuffConfig {
         string memory rand_bytes = bytes32ToString(keccak256(abi.encode(bytes32(retData))));
 
         // Re-concatenate the file with a "__TEMP__" prefix
-        tempFile = parts[0];
+        string memory tempFile = parts[0];
         if (parts.length <= 1) {
             tempFile = string.concat("__TEMP__", rand_bytes, tempFile);
         } else {
@@ -137,17 +139,6 @@ contract HuffConfig {
             }
             tempFile = string.concat(tempFile, "/", "__TEMP__", rand_bytes, parts[parts.length - 1]);
         }
-    }
-
-    function creationCode(string memory file) public payable returns (bytes memory bytecode) {
-        string memory tempFile = createTempFile(file);
-        return creationCode(file, tempFile);
-    }
-
-    /// @notice get creation code of a contract
-    function creationCode(string memory file, string memory tempFile) internal returns (bytes memory bytecode) {
-        binary_check();
-
         // Paste the code in a new temp file
         string[] memory create_cmds = new string[](3);
         // TODO: create_cmds[0] = "$(find . -name \"file_writer.sh\")";
@@ -182,6 +173,12 @@ contract HuffConfig {
 
         /// @notice compile the Huff contract and return the bytecode
         bytecode = vm.ffi(cmds);
+
+        // Clean up temp files
+        string[] memory cleanup = new string[](2);
+        cleanup[0] = "rm";
+        cleanup[1] = string.concat("src/", tempFile, ".huff");
+        vm.ffi(cleanup);
     }
 
     /// @notice get creation code of a contract plus encoded arguments
@@ -192,16 +189,7 @@ contract HuffConfig {
 
     /// @notice Deploy the Contract
     function deploy(string memory file) public payable returns (address) {
-        string memory tempFile = createTempFile(file);
-        bytes memory bytecode = creationCode(file, tempFile);
-        bytes memory concatenated = bytes.concat(bytecode, args);
-
-        // Clean up temp files
-        string[] memory cleanup = new string[](2);
-        cleanup[0] = "rm";
-        cleanup[1] = string.concat("src/", tempFile, ".huff");
-        vm.ffi(cleanup);
-
+        bytes memory concatenated = creationCodeWithArgs(file);
         /// @notice deploy the bytecode with the create instruction
         address deployedAddress;
         if (should_broadcast) vm.broadcast();
