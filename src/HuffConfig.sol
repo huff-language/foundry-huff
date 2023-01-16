@@ -112,7 +112,7 @@ contract HuffConfig {
         return string(str);
     }
 
-    function creationCode(string memory file) public payable returns (bytes memory bytecode) {
+    function creation_code(string memory file) public payable returns (bytes memory bytecode) {
         binary_check();
 
         // Split the file into its parts
@@ -182,14 +182,14 @@ contract HuffConfig {
     }
 
     /// @notice get creation code of a contract plus encoded arguments
-    function creationCodeWithArgs(string memory file) public payable returns (bytes memory bytecode) {
-        bytecode = creationCode(file);
+    function creation_code_with_args(string memory file) public payable returns (bytes memory bytecode) {
+        bytecode = creation_code(file);
         return bytes.concat(bytecode, args);
     }
 
     /// @notice Deploy the Contract
     function deploy(string memory file) public payable returns (address) {
-        bytes memory concatenated = creationCodeWithArgs(file);
+        bytes memory concatenated = creation_code_with_args(file);
         /// @notice deploy the bytecode with the create instruction
         address deployedAddress;
         if (should_broadcast) vm.broadcast();
