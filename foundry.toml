@@ -4,3 +4,6 @@ out = 'out'
 libs = ['lib']
 ffi = true
 fuzz_runs = 2_000
+
+[fmt]
+line_length = 100
