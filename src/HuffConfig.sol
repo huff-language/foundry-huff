@@ -51,26 +51,38 @@ contract HuffConfig {
 
     /// @notice sets a constant to a bytes memory value in the current compilation environment
     /// @dev The `value` string must contain a valid hex number that is <= 32 bytes
-    ///      i.e. "0x01", "0xa57b", "0x0de0b6b3a7640000", etc.
-    function with_constant(string memory key, string memory value_) public returns (HuffConfig) {
+    ///      i.e. "0x01", "0xa57b", "0x0de0b6b3a7640000", etc. 
+    function with_constant(
+        string memory key,
+        string memory value_
+    ) public returns (HuffConfig) {
         const_overrides.push(Constant(key, value_));
         return this;
     }
 
     /// @notice sets a constant to an address value in the current compilation environment
-    function with_addr_constant(string memory key, address value_) public returns (HuffConfig) {
+    function with_addr_constant(
+        string memory key,
+        address value_
+    ) public returns (HuffConfig) {
         const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value_))));
         return this;
     }
 
     /// @notice sets a constant to a bytes32 value in the current compilation environment
-    function with_bytes32_constant(string memory key, bytes32 value_) public returns (HuffConfig) {
+    function with_bytes32_constant(
+        string memory key,
+        bytes32 value_
+    ) public returns (HuffConfig) {
         const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value_))));
         return this;
     }
 
     /// @notice sets a constant to a uint256 value in the current compilation environment
-    function with_uint_constant(string memory key, uint256 value_) public returns (HuffConfig) {
+    function with_uint_constant(
+        string memory key,
+        uint256 value_
+    ) public returns (HuffConfig) {
         const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value_))));
         return this;
     }
@@ -88,30 +100,36 @@ contract HuffConfig {
         bytes memory retData = vm.ffi(bincheck);
         bytes8 first_bytes = retData[0];
         bool decoded = first_bytes == bytes8(hex"01");
-        require(decoded, "Invalid huffc binary. Run `curl -L get.huff.sh | bash` and `huffup` to fix.");
+        require(
+            decoded,
+            "Invalid huffc binary. Run `curl -L get.huff.sh | bash` and `huffup` to fix."
+        );
     }
 
     function bytes32ToString(bytes32 x) internal pure returns (string memory) {
         string memory result;
         for (uint256 j = 0; j < x.length; j++) {
-            result = string.concat(result, string(abi.encodePacked(uint8(x[j]) % 26 + 97)));
+            result = string.concat(
+                result, string(abi.encodePacked(uint8(x[j]) % 26 + 97))
+            );
         }
         return result;
     }
 
-    function bytesToString(bytes memory data) public pure returns (string memory) {
+    function bytesToString(bytes memory data) public pure returns(string memory) {
         bytes memory alphabet = "0123456789abcdef";
 
         bytes memory str = new bytes(2 + data.length * 2);
         str[0] = "0";
         str[1] = "x";
-        for (uint256 i = 0; i < data.length; i++) {
-            str[2 + i * 2] = alphabet[uint256(uint8(data[i] >> 4))];
-            str[3 + i * 2] = alphabet[uint256(uint8(data[i] & 0x0f))];
+        for (uint i = 0; i < data.length; i++) {
+            str[2+i*2] = alphabet[uint(uint8(data[i] >> 4))];
+            str[3+i*2] = alphabet[uint(uint8(data[i] & 0x0f))];
         }
         return string(str);
     }
 
+    /// @notice Get the creation bytecode of a contract
     function creation_code(string memory file) public payable returns (bytes memory bytecode) {
         binary_check();
 
@@ -127,7 +145,8 @@ contract HuffConfig {
         string[] memory time = new string[](1);
         time[0] = "./lib/foundry-huff/scripts/rand_bytes.sh";
         bytes memory retData = vm.ffi(time);
-        string memory rand_bytes = bytes32ToString(keccak256(abi.encode(bytes32(retData))));
+        string memory rand_bytes =
+            bytes32ToString(keccak256(abi.encode(bytes32(retData))));
 
         // Re-concatenate the file with a "__TEMP__" prefix
         string memory tempFile = parts[0];
@@ -137,8 +156,11 @@ contract HuffConfig {
             for (uint256 i = 1; i < parts.length - 1; i++) {
                 tempFile = string.concat(tempFile, "/", parts[i]);
             }
-            tempFile = string.concat(tempFile, "/", "__TEMP__", rand_bytes, parts[parts.length - 1]);
+            tempFile = string.concat(
+                tempFile, "/", "__TEMP__", rand_bytes, parts[parts.length - 1]
+            );
         }
+
         // Paste the code in a new temp file
         string[] memory create_cmds = new string[](3);
         // TODO: create_cmds[0] = "$(find . -name \"file_writer.sh\")";
@@ -199,7 +221,9 @@ contract HuffConfig {
         }
 
         /// @notice check that the deployment was successful
-        require(deployedAddress != address(0), "HuffDeployer could not deploy contract");
+        require(
+            deployedAddress != address(0), "HuffDeployer could not deploy contract"
+        );
 
         /// @notice return the address that the contract was deployed to
         return deployedAddress;
