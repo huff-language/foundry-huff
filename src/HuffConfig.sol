@@ -192,11 +192,13 @@ contract HuffConfig {
         string[] memory cleanup = new string[](2);
         cleanup[0] = "rm";
         cleanup[1] = string.concat("src/", tempFile, ".huff");
-        vm.ffi(cleanup);
-    }
 
         // set `msg.sender` for upcoming create context
         vm.prank(deployer);
+
+
+        vm.ffi(cleanup);
+    }
 
     /// @notice get creation code of a contract plus encoded arguments
     function creation_code_with_args(string memory file) public payable returns (bytes memory bytecode) {
@@ -207,7 +209,7 @@ contract HuffConfig {
     /// @notice Deploy the Contract
     function deploy(string memory file) public payable returns (address) {
         bytes memory concatenated = creation_code_with_args(file);
-        
+
         /// @notice deploy the bytecode with the create instruction
         address deployedAddress;
         if (should_broadcast) vm.broadcast();
