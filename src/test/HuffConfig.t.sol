@@ -30,10 +30,7 @@ contract HuffConfigTest is Test {
         assertEq(config.code(), code);
     }
 
-    function testWithConstantOverrides(
-        string memory key,
-        string memory value
-    ) public {
+    function testWithConstantOverrides(string memory key, string memory value) public {
         config.with_constant(key, value);
         (string memory k, string memory v) = config.const_overrides(0);
         assertEq(key, k);

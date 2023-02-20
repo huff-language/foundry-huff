@@ -26,9 +26,7 @@ contract StatefulDeployerTest is Test {
     }
 
     function testDeployWithArgsAndCode() public {
-        deployer.setArgs(
-            bytes.concat(abi.encode(uint256(0x420)), abi.encode(uint256(0x420)))
-        );
+        deployer.setArgs(bytes.concat(abi.encode(uint256(0x420)), abi.encode(uint256(0x420))));
         deployer.setCode(
             "" "#define macro CONSTRUCTOR() = takes(0) returns (0) { \n"
             "    // Copy the first argument into memory \n"
@@ -51,8 +49,7 @@ contract StatefulDeployerTest is Test {
             "    sstore                      // [] \n" "}"
         );
 
-        construct =
-            IConstructor(deployer.deploy("test/contracts/NoConstructor"));
+        construct = IConstructor(deployer.deploy("test/contracts/NoConstructor"));
         assertEq(address(0x420), construct.getArgOne());
         assertEq(uint256(0x420), construct.getArgTwo());
     }

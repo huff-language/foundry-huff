@@ -9,8 +9,7 @@ contract StatefulDeployer {
     using strings for *;
 
     /// @notice Initializes cheat codes in order to use ffi to compile Huff contracts
-    Vm public constant vm =
-        Vm(address(bytes20(uint160(uint256(keccak256("hevm cheat code"))))));
+    Vm public constant vm = Vm(address(bytes20(uint160(uint256(keccak256("hevm cheat code"))))));
 
     /// @notice additional code to append to the source file
     string public code;
@@ -43,8 +42,7 @@ contract StatefulDeployer {
         for (uint256 i = 1; i < parts.length - 1; i++) {
             tempFile = string.concat(tempFile, "/", parts[i]);
         }
-        tempFile =
-            string.concat(tempFile, "/", "__TEMP__", parts[parts.length - 1]);
+        tempFile = string.concat(tempFile, "/", "__TEMP__", parts[parts.length - 1]);
 
         // Paste the code in a new temp file
         string[] memory create_cmds = new string[](3);
