@@ -25,6 +25,10 @@ contract HuffConfig {
     /// @notice value to deploy the contract with
     uint256 public value;
 
+    /// @notice address that will be the `msg.sender` (op: caller) in the constructor
+    /// @dev set to config address to ensure backwards compatibility
+    address public deployer = address(this);
+
     /// @notice whether to broadcast the deployment tx
     bool public should_broadcast;
 
@@ -46,6 +50,12 @@ contract HuffConfig {
     /// @notice sets the amount of wei to deploy the contract with
     function with_value(uint256 value_) public returns (HuffConfig) {
         value = value_;
+        return this;
+    }
+
+    /// @notice sets the caller of the next deployment
+    function with_deployer(address _deployer) public returns (HuffConfig) {
+        deployer = _deployer;
         return this;
     }
 
@@ -185,6 +195,9 @@ contract HuffConfig {
         vm.ffi(cleanup);
     }
 
+        // set `msg.sender` for upcoming create context
+        vm.prank(deployer);
+
     /// @notice get creation code of a contract plus encoded arguments
     function creation_code_with_args(string memory file) public payable returns (bytes memory bytecode) {
         bytecode = creation_code(file);
@@ -194,6 +207,7 @@ contract HuffConfig {
     /// @notice Deploy the Contract
     function deploy(string memory file) public payable returns (address) {
         bytes memory concatenated = creation_code_with_args(file);
+        
         /// @notice deploy the bytecode with the create instruction
         address deployedAddress;
         if (should_broadcast) vm.broadcast();

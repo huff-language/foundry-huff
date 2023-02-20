@@ -7,6 +7,7 @@ import {HuffConfig} from "../HuffConfig.sol";
 import {HuffDeployer} from "../HuffDeployer.sol";
 import {INumber} from "./interfaces/INumber.sol";
 import {IConstructor} from "./interfaces/IConstructor.sol";
+import {IRememberCreator} from "./interfaces/IRememberCreator.sol";
 
 contract HuffDeployerTest is Test {
     INumber number;
@@ -203,5 +204,29 @@ contract HuffDeployerTest is Test {
     function testSet(uint256 num) public {
         number.setNumber(num);
         assertEq(num, number.getNumber());
+    }
+
+    function testConstructorDefaultCaller() public {
+        HuffConfig config = HuffDeployer.config();
+        IRememberCreator rememberer = IRememberCreator(config.deploy("test/contracts/RememberCreator"));
+        assertEq(rememberer.CREATOR(), address(config));
+    }
+
+    function runTestConstructorCaller(address deployer) public {
+        IRememberCreator rememberer = IRememberCreator(
+            HuffDeployer
+                .config()
+                .with_deployer(deployer)
+                .deploy("test/contracts/RememberCreator")
+        );
+        assertEq(rememberer.CREATOR(), deployer);
+    }
+
+    // @dev fuzzed test too slow, random examples and address(0) chosen
+    function testConstructorCaller() public {
+        runTestConstructorCaller(address(uint160(uint256(keccak256("random addr 1")))));
+        runTestConstructorCaller(address(uint160(uint256(keccak256("random addr 2")))));
+        runTestConstructorCaller(address(0));
+        runTestConstructorCaller(address(uint160(0x1000)));
     }
 }

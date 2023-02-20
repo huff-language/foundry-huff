@@ -15,6 +15,11 @@ contract HuffConfigTest is Test {
         config = new HuffConfig();
     }
 
+    function testWithDeployer(address deployer) public {
+        config.with_deployer(deployer);
+        assertEq(config.deployer(), deployer);
+    }
+
     function testWithArgs(bytes memory some) public {
         config.with_args(some);
         assertEq(config.args(), some);

@@ -1,0 +1,24 @@
+#define constant CREATOR_SLOT = FREE_STORAGE_POINTER()
+
+#define function CREATOR() view returns (address)
+
+#define macro CONSTRUCTOR() = takes(0) returns(0) {
+    caller [CREATOR_SLOT] sstore
+}
+
+#define macro MAIN() = takes(0) returns(0) {
+    0x00 calldataload 0xE0 shr // [selector]
+    __FUNC_SIG(CREATOR) eq get_creator jumpi
+
+    // no selector matched, revert
+    base_error:
+        returndatasize returndatasize revert
+
+    get_creator:
+        // check no call value
+        callvalue base_error jumpi
+        // read and return creator
+        [CREATOR_SLOT] sload   // [creator]
+        returndatasize mstore  // []
+        0x20 returndatasize return
+}
