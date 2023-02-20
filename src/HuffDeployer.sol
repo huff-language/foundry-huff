@@ -10,6 +10,27 @@ library HuffDeployer {
         return new HuffConfig();
     }
 
+    // @notice Deterministically create a new huff config using create2 and a salt
+    function config_with_create_2(uint256 salt) public returns (HuffConfig) {
+        return new HuffConfig{salt: bytes32(salt)}();
+    }
+
+    // @notice Get the address of a HuffConfig deployed with config_with_create_2
+    function get_config_with_create_2(uint256 salt) public view returns (address) {
+        return 
+            address(
+                uint160(
+                    uint256(
+                        keccak256(
+                            abi.encodePacked(
+                                bytes1(0xff), address(this), bytes32(salt), keccak256(type(HuffConfig).creationCode)
+                            )
+                        )
+                    )
+                )
+            );
+    }
+
     /// @notice Compiles a Huff contract and returns the address that the contract was deployeod to
     /// @param fileName - The file name of the Huff contract. For example, the file name for "SimpleStore.huff" is "SimpleStore"
     /// @return The address that the contract was deployed to
