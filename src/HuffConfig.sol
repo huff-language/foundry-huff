@@ -25,6 +25,10 @@ contract HuffConfig {
     /// @notice value to deploy the contract with
     uint256 public value;
 
+    /// @notice address that will be the `msg.sender` (op: caller) in the constructor
+    /// @dev set to config address to ensure backwards compatibility
+    address public deployer = address(this);
+
     /// @notice whether to broadcast the deployment tx
     bool public should_broadcast;
 
@@ -49,40 +53,34 @@ contract HuffConfig {
         return this;
     }
 
+    /// @notice sets the caller of the next deployment
+    function with_deployer(address _deployer) public returns (HuffConfig) {
+        deployer = _deployer;
+        return this;
+    }
+
     /// @notice sets a constant to a bytes memory value in the current compilation environment
     /// @dev The `value` string must contain a valid hex number that is <= 32 bytes
-    ///      i.e. "0x01", "0xa57b", "0x0de0b6b3a7640000", etc. 
-    function with_constant(
-        string memory key,
-        string memory value_
-    ) public returns (HuffConfig) {
+    ///      i.e. "0x01", "0xa57b", "0x0de0b6b3a7640000", etc.
+    function with_constant(string memory key, string memory value_) public returns (HuffConfig) {
         const_overrides.push(Constant(key, value_));
         return this;
     }
 
     /// @notice sets a constant to an address value in the current compilation environment
-    function with_addr_constant(
-        string memory key,
-        address value_
-    ) public returns (HuffConfig) {
+    function with_addr_constant(string memory key, address value_) public returns (HuffConfig) {
         const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value_))));
         return this;
     }
 
     /// @notice sets a constant to a bytes32 value in the current compilation environment
-    function with_bytes32_constant(
-        string memory key,
-        bytes32 value_
-    ) public returns (HuffConfig) {
+    function with_bytes32_constant(string memory key, bytes32 value_) public returns (HuffConfig) {
         const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value_))));
         return this;
     }
 
     /// @notice sets a constant to a uint256 value in the current compilation environment
-    function with_uint_constant(
-        string memory key,
-        uint256 value_
-    ) public returns (HuffConfig) {
+    function with_uint_constant(string memory key, uint256 value_) public returns (HuffConfig) {
         const_overrides.push(Constant(key, bytesToString(abi.encodePacked(value_))));
         return this;
     }
@@ -101,30 +99,27 @@ contract HuffConfig {
         bytes8 first_bytes = retData[0];
         bool decoded = first_bytes == bytes8(hex"01");
         require(
-            decoded,
-            "Invalid huffc binary. Run `curl -L get.huff.sh | bash` and `huffup` to fix."
+            decoded, "Invalid huffc binary. Run `curl -L get.huff.sh | bash` and `huffup` to fix."
         );
     }
 
     function bytes32ToString(bytes32 x) internal pure returns (string memory) {
         string memory result;
         for (uint256 j = 0; j < x.length; j++) {
-            result = string.concat(
-                result, string(abi.encodePacked(uint8(x[j]) % 26 + 97))
-            );
+            result = string.concat(result, string(abi.encodePacked(uint8(x[j]) % 26 + 97)));
         }
         return result;
     }
 
-    function bytesToString(bytes memory data) public pure returns(string memory) {
+    function bytesToString(bytes memory data) public pure returns (string memory) {
         bytes memory alphabet = "0123456789abcdef";
 
         bytes memory str = new bytes(2 + data.length * 2);
         str[0] = "0";
         str[1] = "x";
-        for (uint i = 0; i < data.length; i++) {
-            str[2+i*2] = alphabet[uint(uint8(data[i] >> 4))];
-            str[3+i*2] = alphabet[uint(uint8(data[i] & 0x0f))];
+        for (uint256 i = 0; i < data.length; i++) {
+            str[2 + i * 2] = alphabet[uint256(uint8(data[i] >> 4))];
+            str[3 + i * 2] = alphabet[uint256(uint8(data[i] & 0x0f))];
         }
         return string(str);
     }
@@ -145,8 +140,7 @@ contract HuffConfig {
         string[] memory time = new string[](1);
         time[0] = "./lib/foundry-huff/scripts/rand_bytes.sh";
         bytes memory retData = vm.ffi(time);
-        string memory rand_bytes =
-            bytes32ToString(keccak256(abi.encode(bytes32(retData))));
+        string memory rand_bytes = bytes32ToString(keccak256(abi.encode(bytes32(retData))));
 
         // Re-concatenate the file with a "__TEMP__" prefix
         string memory tempFile = parts[0];
@@ -156,9 +150,7 @@ contract HuffConfig {
             for (uint256 i = 1; i < parts.length - 1; i++) {
                 tempFile = string.concat(tempFile, "/", parts[i]);
             }
-            tempFile = string.concat(
-                tempFile, "/", "__TEMP__", rand_bytes, parts[parts.length - 1]
-            );
+            tempFile = string.concat(tempFile, "/", "__TEMP__", rand_bytes, parts[parts.length - 1]);
         }
 
         // Paste the code in a new temp file
@@ -200,6 +192,11 @@ contract HuffConfig {
         string[] memory cleanup = new string[](2);
         cleanup[0] = "rm";
         cleanup[1] = string.concat("src/", tempFile, ".huff");
+
+        // set `msg.sender` for upcoming create context
+        vm.prank(deployer);
+
+
         vm.ffi(cleanup);
     }
 
@@ -212,6 +209,7 @@ contract HuffConfig {
     /// @notice Deploy the Contract
     function deploy(string memory file) public payable returns (address) {
         bytes memory concatenated = creation_code_with_args(file);
+
         /// @notice deploy the bytecode with the create instruction
         address deployedAddress;
         if (should_broadcast) vm.broadcast();
@@ -221,9 +219,7 @@ contract HuffConfig {
         }
 
         /// @notice check that the deployment was successful
-        require(
-            deployedAddress != address(0), "HuffDeployer could not deploy contract"
-        );
+        require(deployedAddress != address(0), "HuffDeployer could not deploy contract");
 
         /// @notice return the address that the contract was deployed to
         return deployedAddress;
