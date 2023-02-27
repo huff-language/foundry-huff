@@ -1,9 +1,13 @@
 #! /bin/bash
 
-if ! [[ "$(npm list -g huffc)" =~ "empty" ]]; then
+check_cmd() {
+  command -v "$1" > /dev/null 2>&1
+}
+
+if check_cmd npm && ! [[ "$(npm list -g huffc)" =~ "empty" ]]; then
   # huffc was installed via npm, return 0x00
   echo -n 0x00
-elif [[ "$(yarn global list)" =~ "huffc" ]]; then
+elif check_cmd yarn && [[ "$(yarn global list)" =~ "huffc" ]]; then
   # huffc was installed via yarn, return 0x00
   echo -n 0x00
 else
