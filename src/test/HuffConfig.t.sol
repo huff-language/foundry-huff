@@ -47,4 +47,9 @@ contract HuffConfigTest is Test {
         bool b = config.should_broadcast();
         assertEq(b, broadcast);
     }
+
+    function testWithEvmVersion() public {
+        config.with_evm_version("paris");
+        assertEq(config.evm_version(), "paris");
+    }
 }

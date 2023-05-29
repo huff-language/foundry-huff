@@ -32,6 +32,9 @@ contract HuffConfig {
     /// @notice whether to broadcast the deployment tx
     bool public should_broadcast;
 
+    /// @notice supported evm versions
+    string public evm_version;
+
     /// @notice constant overrides for the current compilation environment
     Constant[] public const_overrides;
 
@@ -56,6 +59,12 @@ contract HuffConfig {
     /// @notice sets the caller of the next deployment
     function with_deployer(address _deployer) public returns (HuffConfig) {
         deployer = _deployer;
+        return this;
+    }
+
+    /// @notice sets the evm version to compile with
+    function with_evm_version(string memory _evm_version) public returns (HuffConfig) {
+        evm_version = _evm_version;
         return this;
     }
 
@@ -124,6 +133,15 @@ contract HuffConfig {
         return string(str);
     }
 
+    /// @notice Get the evm version string | else return default ("shanghai")
+    function get_evm_version() public view returns (string memory) {
+        bytes32 _evm_version = bytes32(bytes(abi.encodePacked(evm_version)));
+        if (_evm_version == bytes32(0x0)) {
+            return "shanghai";
+        }
+        return evm_version;
+    }
+
     /// @notice Get the creation bytecode of a contract
     function creation_code(string memory file) public payable returns (bytes memory bytecode) {
         binary_check();
@@ -184,6 +202,8 @@ contract HuffConfig {
         cmds[0] = "huffc";
         cmds[1] = string(string.concat("src/", tempFile, ".huff"));
         cmds[2] = "-b";
+        cmds[3] = "-e";
+        cmds[4] = get_evm_version();
 
         /// @notice compile the Huff contract and return the bytecode
         bytecode = vm.ffi(cmds);
