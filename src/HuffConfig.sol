@@ -187,6 +187,7 @@ contract HuffConfig {
 
         /// @notice compile the Huff contract and return the bytecode
         bytecode = vm.ffi(cmds);
+        require(bytecode.length > 0, "Failed to compile Huff contract.");
 
         // Clean up temp files
         string[] memory cleanup = new string[](2);
