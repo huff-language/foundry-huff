@@ -133,7 +133,7 @@ contract HuffDeployerTest is Test {
 
     function testBytecode() public {
         bytes memory b = bytes(
-            hex"60003560e01c80633fb5c1cb1461001c578063f2c9ecd814610023575b6004356000555b60005460005260206000f3"
+            hex"5f3560e01c80633fb5c1cb1461001b578063f2c9ecd814610021575b6004355f555b5f545f5260205ff3"
         );
         assertEq(getCode(address(number)), b);
     }
