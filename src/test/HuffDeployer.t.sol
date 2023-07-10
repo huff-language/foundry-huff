@@ -19,14 +19,21 @@ contract HuffDeployerTest is Test {
         number = INumber(HuffDeployer.deploy("test/contracts/Number"));
 
         // Backwards-compatible Constructor creation
-        vm.expectEmit(true, true, true, true);
-        emit ArgumentsUpdated(address(0x420), uint256(0x420));
+        vm.recordLogs();
         structor = IConstructor(
             HuffDeployer.deploy_with_args(
                 "test/contracts/Constructor",
                 bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420)))
             )
         );
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+
+        assertEq(entries.length, 1);
+        assertEq(entries[0].topics.length, 3);
+        assertEq(entries[0].topics[0], bytes32(uint256(keccak256("ArgumentsUpdated(address,uint256)"))));
+        assertEq(entries[0].topics[1], bytes32(uint256(uint160(address(0x420)))));
+        assertEq(entries[0].topics[2], bytes32(uint256(0x420)));
+
     }
 
     function testChaining() public {
@@ -57,13 +64,19 @@ contract HuffDeployerTest is Test {
             "    log3                             // [] \n" "}";
 
         // New pattern
-        vm.expectEmit(true, true, true, true);
-        emit ArgumentsUpdated(address(0x420), uint256(0x420));
+        vm.recordLogs();
         IConstructor chained = IConstructor(
             HuffDeployer.config().with_args(
                 bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420)))
             ).with_code(constructor_macro).deploy("test/contracts/NoConstructor")
         );
+
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        assertEq(entries.length, 1);
+        assertEq(entries[0].topics.length, 3);
+        assertEq(entries[0].topics[0], bytes32(uint256(keccak256("ArgumentsUpdated(address,uint256)"))));
+        assertEq(entries[0].topics[1], bytes32(uint256(uint160(address(0x420)))));
+        assertEq(entries[0].topics[2], bytes32(uint256(0x420)));
 
         assertEq(address(0x420), chained.getArgOne());
         assertEq(uint256(0x420), chained.getArgTwo());
@@ -93,12 +106,18 @@ contract HuffDeployerTest is Test {
             "    log3                             // [] \n" "}";
 
         // New pattern
-        vm.expectEmit(true, true, true, true);
-        emit ArgumentsUpdated(address(0x420), uint256(0x420));
+        vm.recordLogs();
         IConstructor chained = IConstructor(
             HuffDeployer.config_with_create_2(1).with_args(bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420))))
                 .with_code(constructor_macro).deploy("test/contracts/NoConstructor")
         );
+
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        assertEq(entries.length, 1);
+        assertEq(entries[0].topics.length, 3);
+        assertEq(entries[0].topics[0], bytes32(uint256(keccak256("ArgumentsUpdated(address,uint256)"))));
+        assertEq(entries[0].topics[1], bytes32(uint256(uint160(address(0x420)))));
+        assertEq(entries[0].topics[2], bytes32(uint256(0x420)));
 
         assertEq(address(0x420), chained.getArgOne());
         assertEq(uint256(0x420), chained.getArgTwo());

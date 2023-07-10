@@ -18,23 +18,34 @@ contract LoggingTest is Test {
     );
 
     function testLoggingWithArgs() public {
-        // Ignore the second topic (address) since the internal HuffConfig is the msg.sender
-        vm.expectEmit(false, true, true, true);
-        emit LogOne();
-        emit LogTwo(address(0));
-        emit LogThree(address(0), 0);
-        emit LogFour(address(0), 0, keccak256(abi.encode(1)));
-        emit Extended(
-            address(0),
-            0,
-            keccak256(abi.encode(1)),
-            keccak256(abi.encode(2)),
-            keccak256(abi.encode(3))
-            );
+       vm.recordLogs();
         HuffDeployer.deploy_with_args(
             "test/contracts/LotsOfLogging",
             bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420)))
         );
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+
+        assertEq(entries.length, 5);
+        assertEq(entries[0].topics.length, 1);
+        assertEq(entries[0].topics[0], bytes32(uint256(keccak256("LogOne()"))));
+        assertEq(entries[1].topics.length, 2);
+        assertEq(entries[1].topics[0], bytes32(uint256(keccak256("LogTwo(address)"))));
+        // assertEq(entries[1].topics[1], ?); should be address from deployed config
+        assertEq(entries[2].topics.length, 3);
+        assertEq(entries[2].topics[0], bytes32(uint256(keccak256("LogThree(address,uint256)"))));
+        // assertEq(entries[2].topics[1], ?); should be address from deployed config
+        assertEq(entries[2].topics[2], bytes32(uint256(0x0)));
+        assertEq(entries[3].topics.length, 4);
+        assertEq(entries[3].topics[0], bytes32(uint256(keccak256("LogFour(address,uint256,bytes32)"))));
+        // assertEq(entries[3].topics[1], ?); should be address from deployed config
+        assertEq(entries[3].topics[2], bytes32(uint256(0x0)));
+        assertEq(entries[3].topics[3], bytes32(uint256(keccak256(abi.encode(1)))));
+        assertEq(entries[4].topics.length, 4);
+        assertEq(entries[4].topics[0], bytes32(uint256(keccak256("Extended(address,uint256,bytes32,bytes32,bytes32)"))));
+        // assertEq(entries[4].topics[1], ?); should be address from deployed config
+        assertEq(entries[4].topics[2], bytes32(uint256(0x0)));
+        assertEq(entries[4].topics[3], bytes32(uint256(keccak256(abi.encode(1)))));
+        assertEq(entries[4].data, abi.encode(keccak256(abi.encode(2)), keccak256(abi.encode(3))));
     }
 
     function testLoggingWithDeploy() public {
