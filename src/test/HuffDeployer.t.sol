@@ -264,7 +264,7 @@ contract HuffDeployerTest is Test {
     /// @dev test that compilation is different with new evm versions
     function testSettingEVMVersion() public {
         /// expected bytecode for EVM version "paris"
-        bytes memory expectedParis = hex"60028060093d393df36000";
+        bytes memory expectedParis = hex"6000";
         HuffConfig config = HuffDeployer.config().with_evm_version("paris");
         address withParis = config.deploy("test/contracts/EVMVersionCheck");
 
@@ -272,15 +272,15 @@ contract HuffDeployerTest is Test {
         assertEq(parisBytecode, expectedParis);
 
         /// expected bytecode for EVM version "shanghai" | default
-        bytes memory expectedShanghai = hex"60018060093d393df35f";
+        bytes memory expectedShanghai = hex"5f";
         HuffConfig shanghaiConfig = HuffDeployer.config().with_evm_version("shanghai");
-        address withShanghai = config.deploy("test/contracts/EVMVersionCheck");
+        address withShanghai = shanghaiConfig.deploy("test/contracts/EVMVersionCheck");
         bytes memory shanghaiBytecode = getBytecode(withShanghai);
         assertEq(shanghaiBytecode, expectedShanghai);
 
         /// Default should be shanghai (latest)
         HuffConfig defaultConfig = HuffDeployer.config().with_evm_version("");
-        address withDefault = config.deploy("test/contracts/EVMVersionCheck");
+        address withDefault = defaultConfig.deploy("test/contracts/EVMVersionCheck");
 
         bytes memory defaultBytecode = getBytecode(withDefault);
         assertEq(defaultBytecode, expectedShanghai);
