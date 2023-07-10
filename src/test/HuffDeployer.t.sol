@@ -19,14 +19,21 @@ contract HuffDeployerTest is Test {
         number = INumber(HuffDeployer.deploy("test/contracts/Number"));
 
         // Backwards-compatible Constructor creation
-        vm.expectEmit(true, true, true, true);
-        emit ArgumentsUpdated(address(0x420), uint256(0x420));
+        vm.recordLogs();
         structor = IConstructor(
             HuffDeployer.deploy_with_args(
                 "test/contracts/Constructor",
                 bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420)))
             )
         );
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+
+        assertEq(entries.length, 1);
+        assertEq(entries[0].topics.length, 3);
+        assertEq(entries[0].topics[0], bytes32(uint256(keccak256("ArgumentsUpdated(address,uint256)"))));
+        assertEq(entries[0].topics[1], bytes32(uint256(uint160(address(0x420)))));
+        assertEq(entries[0].topics[2], bytes32(uint256(0x420)));
+
     }
 
     function testChaining() public {
@@ -57,13 +64,19 @@ contract HuffDeployerTest is Test {
             "    log3                             // [] \n" "}";
 
         // New pattern
-        vm.expectEmit(true, true, true, true);
-        emit ArgumentsUpdated(address(0x420), uint256(0x420));
+        vm.recordLogs();
         IConstructor chained = IConstructor(
             HuffDeployer.config().with_args(
                 bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420)))
             ).with_code(constructor_macro).deploy("test/contracts/NoConstructor")
         );
+
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        assertEq(entries.length, 1);
+        assertEq(entries[0].topics.length, 3);
+        assertEq(entries[0].topics[0], bytes32(uint256(keccak256("ArgumentsUpdated(address,uint256)"))));
+        assertEq(entries[0].topics[1], bytes32(uint256(uint160(address(0x420)))));
+        assertEq(entries[0].topics[2], bytes32(uint256(0x420)));
 
         assertEq(address(0x420), chained.getArgOne());
         assertEq(uint256(0x420), chained.getArgTwo());
@@ -93,12 +106,18 @@ contract HuffDeployerTest is Test {
             "    log3                             // [] \n" "}";
 
         // New pattern
-        vm.expectEmit(true, true, true, true);
-        emit ArgumentsUpdated(address(0x420), uint256(0x420));
+        vm.recordLogs();
         IConstructor chained = IConstructor(
             HuffDeployer.config_with_create_2(1).with_args(bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420))))
                 .with_code(constructor_macro).deploy("test/contracts/NoConstructor")
         );
+
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        assertEq(entries.length, 1);
+        assertEq(entries[0].topics.length, 3);
+        assertEq(entries[0].topics[0], bytes32(uint256(keccak256("ArgumentsUpdated(address,uint256)"))));
+        assertEq(entries[0].topics[1], bytes32(uint256(uint160(address(0x420)))));
+        assertEq(entries[0].topics[2], bytes32(uint256(0x420)));
 
         assertEq(address(0x420), chained.getArgOne());
         assertEq(uint256(0x420), chained.getArgTwo());
@@ -114,7 +133,7 @@ contract HuffDeployerTest is Test {
 
     function testBytecode() public {
         bytes memory b = bytes(
-            hex"60003560e01c80633fb5c1cb1461001c578063f2c9ecd814610023575b6004356000555b60005460005260206000f3"
+            hex"5f3560e01c80633fb5c1cb1461001b578063f2c9ecd814610021575b6004355f555b5f545f5260205ff3"
         );
         assertEq(getCode(address(number)), b);
     }
@@ -228,5 +247,30 @@ contract HuffDeployerTest is Test {
         runTestConstructorCaller(address(uint160(uint256(keccak256("random addr 2")))));
         runTestConstructorCaller(address(0));
         runTestConstructorCaller(address(uint160(0x1000)));
+    }
+
+    /// @dev test that compilation is different with new evm versions
+    function testSettingEVMVersion() public {
+        /// expected bytecode for EVM version "paris"
+        bytes memory expectedParis = hex"6000";
+        HuffConfig config = HuffDeployer.config().with_evm_version("paris");
+        address withParis = config.deploy("test/contracts/EVMVersionCheck");
+
+        bytes memory parisBytecode = withParis.code;
+        assertEq(parisBytecode, expectedParis);
+
+        /// expected bytecode for EVM version "shanghai" | default
+        bytes memory expectedShanghai = hex"5f";
+        HuffConfig shanghaiConfig = HuffDeployer.config().with_evm_version("shanghai");
+        address withShanghai = shanghaiConfig.deploy("test/contracts/EVMVersionCheck");
+        bytes memory shanghaiBytecode = withShanghai.code;
+        assertEq(shanghaiBytecode, expectedShanghai);
+
+        /// Default should be shanghai (latest)
+        HuffConfig defaultConfig = HuffDeployer.config().with_evm_version("");
+        address withDefault = defaultConfig.deploy("test/contracts/EVMVersionCheck");
+
+        bytes memory defaultBytecode = withDefault.code;
+        assertEq(defaultBytecode, expectedShanghai);
     }
 }
