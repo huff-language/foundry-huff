@@ -5,6 +5,6 @@ libs = ['lib']
 ffi = true
 fuzz_runs = 2_000
 solc_version = '0.8.20'
-evm_version = 'paris'
+evm_version = 'shanghai'
 [fmt]
 line_length = 100
