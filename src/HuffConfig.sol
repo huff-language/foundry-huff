@@ -214,14 +214,19 @@ contract HuffConfig {
         cleanup[1] = string.concat("src/", tempFile, ".huff");
 
         // set `msg.sender` for upcoming create context
-        vm.prank(deployer);
-
+        if (!should_broadcast) {
+            vm.prank(deployer);
+        }
 
         vm.ffi(cleanup);
     }
 
     /// @notice get creation code of a contract plus encoded arguments
-    function creation_code_with_args(string memory file) public payable returns (bytes memory bytecode) {
+    function creation_code_with_args(string memory file)
+        public
+        payable
+        returns (bytes memory bytecode)
+    {
         bytecode = creation_code(file);
         return bytes.concat(bytecode, args);
     }
