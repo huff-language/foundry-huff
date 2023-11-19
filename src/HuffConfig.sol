@@ -144,6 +144,20 @@ contract HuffConfig {
 
     /// @notice Get the creation bytecode of a contract
     function creation_code(string memory file) public payable returns (bytes memory bytecode) {
+        return get_code({file: file, is_creation: true});
+    }
+
+    /// @notice Get the runtime bytecode of a contract
+    function runtime_code(string memory file) public payable returns (bytes memory bytecode) {
+        return get_code({file: file, is_creation: false});
+    }
+
+    /// @notice Get the bytecode of a contract
+    function get_code(string memory file, bool is_creation)
+        public
+        payable
+        returns (bytes memory bytecode)
+    {
         binary_check();
 
         // Split the file into its parts
@@ -201,7 +215,11 @@ contract HuffConfig {
 
         cmds[0] = "huffc";
         cmds[1] = string(string.concat("src/", tempFile, ".huff"));
-        cmds[2] = "-b";
+        if (is_creation) {
+            cmds[2] = "-b";
+        } else {
+            cmds[2] = "-r";
+        }
         cmds[3] = "-e";
         cmds[4] = get_evm_version();
 
@@ -215,7 +233,6 @@ contract HuffConfig {
 
         // set `msg.sender` for upcoming create context
         vm.prank(deployer);
-
 
         vm.ffi(cleanup);
     }
