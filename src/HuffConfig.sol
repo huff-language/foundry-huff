@@ -212,11 +212,6 @@ contract HuffConfig {
         string[] memory cleanup = new string[](2);
         cleanup[0] = "rm";
         cleanup[1] = string.concat("src/", tempFile, ".huff");
-
-        // set `msg.sender` for upcoming create context
-        vm.prank(deployer);
-
-
         vm.ffi(cleanup);
     }
 
@@ -232,7 +227,11 @@ contract HuffConfig {
 
         /// @notice deploy the bytecode with the create instruction
         address deployedAddress;
-        if (should_broadcast) vm.broadcast();
+        if (should_broadcast) {
+            vm.broadcast();
+        } else {
+            vm.prank(deployer);
+        }
         assembly {
             let val := sload(value.slot)
             deployedAddress := create(val, add(concatenated, 0x20), mload(concatenated))
