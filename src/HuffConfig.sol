@@ -2,7 +2,7 @@
 pragma solidity >=0.8.13 <0.9.0;
 
 import {Vm} from "forge-std/Vm.sol";
-import {strings} from "stringutils/strings.sol";
+import {strings} from "stringutils/src/strings.sol";
 
 contract HuffConfig {
     using strings for *;
