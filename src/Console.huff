@@ -1,0 +1,472 @@
+/// @title Console
+/// @notice SPDX-License-Identifier: MIT
+/// @author AmadiMichael <https://github.com/AmadiMichael>
+/// @notice Console.log functionalities for huff/bytecode written contracts compiled using foundry
+
+
+
+
+//////////////////////  STYLE=STD CONSTANTS  /////////////////////////////
+
+
+#define constant RED = 0x1b5b39316d000000000000000000000000000000000000000000000000000000
+#define constant GREEN = 0x1b5b39326d000000000000000000000000000000000000000000000000000000
+#define constant YELLOW = 0x1b5b39336d000000000000000000000000000000000000000000000000000000
+#define constant BLUE = 0x1b5b39346d000000000000000000000000000000000000000000000000000000
+#define constant MAGENTA = 0x1b5b39356d000000000000000000000000000000000000000000000000000000
+#define constant CYAN = 0x1b5b39366d000000000000000000000000000000000000000000000000000000
+#define constant BOLD = 0x1b5b316d00000000000000000000000000000000000000000000000000000000
+#define constant DIM = 0x1b5b326d00000000000000000000000000000000000000000000000000000000
+#define constant ITALIC = 0x1b5b336d00000000000000000000000000000000000000000000000000000000
+#define constant UNDERLINE = 0x1b5b346d00000000000000000000000000000000000000000000000000000000
+#define constant INVERSE = 0x1b5b376d00000000000000000000000000000000000000000000000000000000
+#define constant RESET = 0x1b5b306d00000000000000000000000000000000000000000000000000000000
+
+
+
+
+
+
+//////////////////////  EXPERIMENTAL (STYLE-STD)  /////////////////////////////
+
+
+/// @notice EXPERIMENTAL FEATURE
+/// @notice can be used to create a line break to help differentiate between different logs
+/// @dev @param start is the offset to pre store line break bytecode in memory
+/// @dev @param mem_ptr is free memory location to be used for logging operations (would take more than 32 bytes)
+#define macro LINE_BREAK(start, mem_ptr) = {
+    // "0a" is hex for "\n" which breaks into a new line
+    __RIGHTPAD(0x0a) <start> mstore
+    // logs out memory as bytes from offset 0x00 till offset 0x00 + 0x06 bytes and uses memory offset 0x20 for logging operations
+    LOG_MEMORY_AS_STRING(<start>, 0x01, <mem_ptr>)
+}
+ 
+
+/// @notice EXPERIMENTAL FEATURE
+/// @notice styled logs is still experimental
+/// @notice console log the first item of the stack 
+/// @dev @param style is the offset in memory where the color signature is stored
+#define macro LOG_MEMORY_AS_STRING_STYLE(start, size, mem_ptr, style) = {
+    0x41304fac00000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+
+    0x20 <mem_ptr> 0x04 add mstore
+    <size> 0x09 add <mem_ptr> 0x24 add mstore
+
+    <style> mload <mem_ptr> 0x44 add mstore
+    
+    <size> <mem_ptr> 0x49 add <size> <start> 0x04 gas 
+    staticcall pop
+
+    0x1b5b306d00000000000000000000000000000000000000000000000000000000 <mem_ptr> 0x49 <size> add add mstore
+
+    0x00 0x00 <size> 0x4d add <mem_ptr> 0x000000000000000000636F6e736F6c652e6c6f67 gas 
+    staticcall pop
+}
+
+
+
+
+
+
+
+//////////////////////  MEMORY  /////////////////////////////
+
+
+/// @notice console log memory from `start` to (`start` + `size`) as bytes
+/// @dev @param mem_ptr is the memory offset to be used by the macro, should be safe to use to avoid overriding useful memory data
+#define macro LOG_MEMORY(start, size, mem_ptr) = {
+    0x0be77f5600000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    _LOG_MEMORY(<start>, <size>, <mem_ptr>)
+}
+
+
+/// @notice console log memory between start to (start + size) as string
+/// @dev the length pointer and length are added automatically here so `start` 
+/// should be the offset of the actual data and not the offset of the length or length pointer
+/// To see the full data (length included), use LOG_MEMORY
+/// @dev @param mem_ptr is the memory offset to be used by the macro, should be safe to use to avoid overriding useful memory data
+#define macro LOG_MEMORY_AS_STRING(start, size, mem_ptr) = {
+    0x41304fac00000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    _LOG_MEMORY(<start>, <size>, <mem_ptr>)
+}
+
+
+
+
+
+
+
+
+//////////////////////  CALLDATA  /////////////////////////////
+
+
+/// @notice console log calldata from `start` to (`start` + `size`) as bytes
+/// @dev @param mem_ptr is the memory offset to be used by the macro, should be safe to use to avoid overriding useful memory data
+#define macro LOG_CALLDATA(start, size, mem_ptr) = {
+    0x0be77f5600000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    _LOG_CALLDATA(<start>, <size>, <mem_ptr>)
+}
+
+/// @notice console log calldata between start to (start + size) as string
+/// @dev the length pointer and length are added automatically here so `start` 
+/// should be the offset of the actual data and not the offset of the length or length pointer
+/// To see the full data (pointer and length included), use LOG_CALLDATA
+/// @dev @param mem_ptr is the memory offset to be used by the macro, should be safe to use to avoid overriding useful memory data
+#define macro LOG_CALLDATA_AS_STRING(start, size, mem_ptr) = {
+    0x41304fac00000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    _LOG_CALLDATA(<start>, <size>, <mem_ptr>)
+
+}
+
+
+//////////////////////  CALLDATA (TYPES) /////////////////////////////
+
+
+/// @notice console log calldata from `start` to (`start` + `size`) as uint256
+/// @dev @param mem_ptr is the memory offset to be used by the macro, should be safe to use to avoid overriding useful memory data
+#define macro LOG_CALLDATA_AS_UINT(start, mem_ptr) = {
+    0xf5b1bba900000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_CALLDATA_TYPE(<start>, <mem_ptr>)
+}
+
+/// @notice console log calldata from `start` to (`start` + `size`) as int256
+/// @dev @param mem_ptr is the memory offset to be used by the macro, should be safe to use to avoid overriding useful memory data
+#define macro LOG_CALLDATA_AS_INT(start, mem_ptr) = {
+    0x4e0c1d1d00000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_CALLDATA_TYPE(<start>, <mem_ptr>)
+}
+
+/// @notice console log calldata from `start` to (`start` + `size`) as an address
+/// @dev @param mem_ptr is the memory offset to be used by the macro, should be safe to use to avoid overriding useful memory data
+#define macro LOG_CALLDATA_AS_ADDRESS(start, mem_ptr) = {
+    0x2c2ecbc200000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_CALLDATA_TYPE(<start>, <mem_ptr>)
+}
+
+/// @notice console log calldata from `start` to (`start` + `size`) as a bytes32
+/// @dev @param mem_ptr is the memory offset to be used by the macro, should be safe to use to avoid overriding useful memory data
+#define macro LOG_CALLDATA_AS_BYTES32(start, mem_ptr) = {
+    0x27b7cf8500000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_CALLDATA_TYPE(<start>, <mem_ptr>)
+}
+
+/// @notice console log calldata from `start` to (`start` + `size`) as a boolean
+/// @dev @param mem_ptr is the memory offset to be used by the macro, should be safe to use to avoid overriding useful memory data
+/// @dev only 0x01 is seen as true in this case. meaning 0x00 and any value greater than 0x02 will log out false
+#define macro LOG_CALLDATA_AS_BOOL(start, mem_ptr) = {
+    0x32458eed00000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_CALLDATA_TYPE(<start>, <mem_ptr>)
+}
+
+
+
+
+
+
+
+//////////////////////  STACK (TYPES)  /////////////////////////////
+
+
+/// @notice console log stack item `N`as uint256
+/// @dev @param dupN should be any dup opcode from dup1 to dup16
+/// @dev @param mem_ptr is the memory offset to be used by the macro, should be safe to use to avoid overriding useful memory data
+#define macro LOG_STACK_AS_UINT(dupN, mem_ptr) = {
+    0xf5b1bba900000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(<dupN>, <mem_ptr>)
+}
+
+/// @notice console log stack item `N`as int256
+/// @dev @param dupN should be any dup opcode from dup1 to dup16
+/// @dev @param mem_ptr is the memory offset to be used by the macro, should be safe to use to avoid overriding useful memory data
+#define macro LOG_STACK_AS_INT(dupN, mem_ptr) = {
+    0x4e0c1d1d00000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(<dupN>, <mem_ptr>)
+}
+
+/// @notice console log stack item `N`as an address
+/// @dev @param dupN should be any dup opcode from dup1 to dup16
+/// @dev @param mem_ptr is the memory offset to be used by the macro, should be safe to use to avoid overriding useful memory data
+#define macro LOG_STACK_AS_ADDRESS(dupN, mem_ptr) = {
+    0x2c2ecbc200000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(<dupN>, <mem_ptr>)
+}
+
+/// @notice console log stack item `N`as bytes32
+/// @dev @param dupN should be any dup opcode from dup1 to dup16
+/// @dev @param mem_ptr is the memory offset to be used by the macro, should be safe to use to avoid overriding useful memory data
+#define macro LOG_STACK_AS_BYTES32(dupN, mem_ptr) = {
+    0x27b7cf8500000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(<dupN>, <mem_ptr>)
+}
+
+/// @notice console log stack item `N`as a boolean
+/// @dev @param dupN should be any dup opcode from dup1 to dup16
+/// @dev @param mem_ptr is the memory offset to be used by the macro, should be safe to use to avoid overriding useful memory data
+/// @dev only 0x01 is seen as true in this case. meaning 0x00 and any value greater than 0x02 will log out false. Consider logging as a uint too.
+#define macro LOG_STACK_AS_BOOL(dupN, mem_ptr) = {
+    0x32458eed00000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(<dupN>, <mem_ptr>)
+}
+
+
+
+
+
+//////////////////////  STACK  /////////////////////////////
+
+
+/// @notice console log the first item of the stack 
+#define macro LOG_STACK_1(mem_ptr) = {
+    0x27b7cf8500000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(dup1, <mem_ptr>)
+}
+
+/// @notice console log the first 2 items of the stack 
+#define macro LOG_STACK_2(mem_ptr) = {
+    0x27b7cf8500000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(dup1, <mem_ptr>)
+    LOG_STACK(dup2, <mem_ptr>)
+}
+
+/// @notice console log the first 3 items of the stack 
+#define macro LOG_STACK_3(mem_ptr) = {
+    0x27b7cf8500000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(dup1, <mem_ptr>)
+    LOG_STACK(dup2, <mem_ptr>)
+    LOG_STACK(dup3, <mem_ptr>)
+}
+
+/// @notice console log the first 4 items of the stack 
+#define macro LOG_STACK_4(mem_ptr) = {
+    0x27b7cf8500000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(dup1, <mem_ptr>)
+    LOG_STACK(dup2, <mem_ptr>)
+    LOG_STACK(dup3, <mem_ptr>)
+    LOG_STACK(dup4, <mem_ptr>)
+}
+
+/// @notice console log the first 5 items of the stack 
+#define macro LOG_STACK_5(mem_ptr) = {
+    0x27b7cf8500000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(dup1, <mem_ptr>)
+    LOG_STACK(dup2, <mem_ptr>)
+    LOG_STACK(dup3, <mem_ptr>)
+    LOG_STACK(dup4, <mem_ptr>)
+    LOG_STACK(dup5, <mem_ptr>)
+}
+
+/// @notice console log the first 6 items of the stack 
+#define macro LOG_STACK_6(mem_ptr) = {
+    0x27b7cf8500000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(dup1, <mem_ptr>)
+    LOG_STACK(dup2, <mem_ptr>)
+    LOG_STACK(dup3, <mem_ptr>)
+    LOG_STACK(dup4, <mem_ptr>)
+    LOG_STACK(dup5, <mem_ptr>)
+    LOG_STACK(dup6, <mem_ptr>)
+}
+
+/// @notice console log the first 7 items of the stack 
+#define macro LOG_STACK_7(mem_ptr) = {
+    0x27b7cf8500000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(dup1, <mem_ptr>)
+    LOG_STACK(dup2, <mem_ptr>)
+    LOG_STACK(dup3, <mem_ptr>)
+    LOG_STACK(dup4, <mem_ptr>)
+    LOG_STACK(dup5, <mem_ptr>)
+    LOG_STACK(dup6, <mem_ptr>)
+    LOG_STACK(dup7, <mem_ptr>)
+}
+
+/// @notice console log the first 8 items of the stack 
+#define macro LOG_STACK_8(mem_ptr) = {
+    0x27b7cf8500000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(dup1, <mem_ptr>)
+    LOG_STACK(dup2, <mem_ptr>)
+    LOG_STACK(dup3, <mem_ptr>)
+    LOG_STACK(dup4, <mem_ptr>)
+    LOG_STACK(dup5, <mem_ptr>)
+    LOG_STACK(dup6, <mem_ptr>)
+    LOG_STACK(dup7, <mem_ptr>)
+    LOG_STACK(dup8, <mem_ptr>)
+}
+
+/// @notice console log the first 9 items of the stack 
+#define macro LOG_STACK_9(mem_ptr) = {
+    0x27b7cf8500000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(dup1, <mem_ptr>)
+    LOG_STACK(dup2, <mem_ptr>)
+    LOG_STACK(dup3, <mem_ptr>)
+    LOG_STACK(dup4, <mem_ptr>)
+    LOG_STACK(dup5, <mem_ptr>)
+    LOG_STACK(dup6, <mem_ptr>)
+    LOG_STACK(dup7, <mem_ptr>)
+    LOG_STACK(dup8, <mem_ptr>)
+    LOG_STACK(dup9, <mem_ptr>)
+}
+
+/// @notice console log the first 10 items of the stack 
+#define macro LOG_STACK_10(mem_ptr) = {
+    0x27b7cf8500000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(dup1, <mem_ptr>)
+    LOG_STACK(dup2, <mem_ptr>)
+    LOG_STACK(dup3, <mem_ptr>)
+    LOG_STACK(dup4, <mem_ptr>)
+    LOG_STACK(dup5, <mem_ptr>)
+    LOG_STACK(dup6, <mem_ptr>)
+    LOG_STACK(dup7, <mem_ptr>)
+    LOG_STACK(dup8, <mem_ptr>)
+    LOG_STACK(dup9, <mem_ptr>)
+    LOG_STACK(dup10, <mem_ptr>)
+}
+
+/// @notice console log the first 11 items of the stack 
+#define macro LOG_STACK_11(mem_ptr) = {
+    0x27b7cf8500000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(dup1, <mem_ptr>)
+    LOG_STACK(dup2, <mem_ptr>)
+    LOG_STACK(dup3, <mem_ptr>)
+    LOG_STACK(dup4, <mem_ptr>)
+    LOG_STACK(dup5, <mem_ptr>)
+    LOG_STACK(dup6, <mem_ptr>)
+    LOG_STACK(dup7, <mem_ptr>)
+    LOG_STACK(dup8, <mem_ptr>)
+    LOG_STACK(dup9, <mem_ptr>)
+    LOG_STACK(dup10, <mem_ptr>)
+    LOG_STACK(dup11, <mem_ptr>)
+}
+
+/// @notice console log the first 12 items of the stack 
+#define macro LOG_STACK_12(mem_ptr) = {
+    0x27b7cf8500000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(dup1, <mem_ptr>)
+    LOG_STACK(dup2, <mem_ptr>)
+    LOG_STACK(dup3, <mem_ptr>)
+    LOG_STACK(dup4, <mem_ptr>)
+    LOG_STACK(dup5, <mem_ptr>)
+    LOG_STACK(dup6, <mem_ptr>)
+    LOG_STACK(dup7, <mem_ptr>)
+    LOG_STACK(dup8, <mem_ptr>)
+    LOG_STACK(dup9, <mem_ptr>)
+    LOG_STACK(dup10, <mem_ptr>)
+    LOG_STACK(dup11, <mem_ptr>)
+    LOG_STACK(dup12, <mem_ptr>)
+}
+
+/// @notice console log the first 13 items of the stack 
+#define macro LOG_STACK_13(mem_ptr) = {
+    0x27b7cf8500000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(dup1, <mem_ptr>)
+    LOG_STACK(dup2, <mem_ptr>)
+    LOG_STACK(dup3, <mem_ptr>)
+    LOG_STACK(dup4, <mem_ptr>)
+    LOG_STACK(dup5, <mem_ptr>)
+    LOG_STACK(dup6, <mem_ptr>)
+    LOG_STACK(dup7, <mem_ptr>)
+    LOG_STACK(dup8, <mem_ptr>)
+    LOG_STACK(dup9, <mem_ptr>)
+    LOG_STACK(dup10, <mem_ptr>)
+    LOG_STACK(dup11, <mem_ptr>)
+    LOG_STACK(dup12, <mem_ptr>)
+    LOG_STACK(dup13, <mem_ptr>)
+}
+
+/// @notice console log the first 14 items of the stack 
+#define macro LOG_STACK_14(mem_ptr) = {
+    0x27b7cf8500000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(dup1, <mem_ptr>)
+    LOG_STACK(dup2, <mem_ptr>)
+    LOG_STACK(dup3, <mem_ptr>)
+    LOG_STACK(dup4, <mem_ptr>)
+    LOG_STACK(dup5, <mem_ptr>)
+    LOG_STACK(dup6, <mem_ptr>)
+    LOG_STACK(dup7, <mem_ptr>)
+    LOG_STACK(dup8, <mem_ptr>)
+    LOG_STACK(dup9, <mem_ptr>)
+    LOG_STACK(dup10, <mem_ptr>)
+    LOG_STACK(dup11, <mem_ptr>)
+    LOG_STACK(dup12, <mem_ptr>)
+    LOG_STACK(dup13, <mem_ptr>)
+    LOG_STACK(dup14, <mem_ptr>)
+}
+
+/// @notice console log the first 15 items of the stack 
+#define macro LOG_STACK_15(mem_ptr) = {
+    0x27b7cf8500000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(dup1, <mem_ptr>)
+    LOG_STACK(dup2, <mem_ptr>)
+    LOG_STACK(dup3, <mem_ptr>)
+    LOG_STACK(dup4, <mem_ptr>)
+    LOG_STACK(dup5, <mem_ptr>)
+    LOG_STACK(dup6, <mem_ptr>)
+    LOG_STACK(dup7, <mem_ptr>)
+    LOG_STACK(dup8, <mem_ptr>)
+    LOG_STACK(dup9, <mem_ptr>)
+    LOG_STACK(dup10, <mem_ptr>)
+    LOG_STACK(dup11, <mem_ptr>)
+    LOG_STACK(dup12, <mem_ptr>)
+    LOG_STACK(dup13, <mem_ptr>)
+    LOG_STACK(dup14, <mem_ptr>)
+    LOG_STACK(dup15, <mem_ptr>)
+}
+
+/// @notice console log the first 16 items of the stack 
+#define macro LOG_STACK_16(mem_ptr) = {
+    0x27b7cf8500000000000000000000000000000000000000000000000000000000 <mem_ptr> mstore
+    LOG_STACK(dup1, <mem_ptr>)
+    LOG_STACK(dup2, <mem_ptr>)
+    LOG_STACK(dup3, <mem_ptr>)
+    LOG_STACK(dup4, <mem_ptr>)
+    LOG_STACK(dup5, <mem_ptr>)
+    LOG_STACK(dup6, <mem_ptr>)
+    LOG_STACK(dup7, <mem_ptr>)
+    LOG_STACK(dup8, <mem_ptr>)
+    LOG_STACK(dup9, <mem_ptr>)
+    LOG_STACK(dup10, <mem_ptr>)
+    LOG_STACK(dup11, <mem_ptr>)
+    LOG_STACK(dup12, <mem_ptr>)
+    LOG_STACK(dup13, <mem_ptr>)
+    LOG_STACK(dup14, <mem_ptr>)
+    LOG_STACK(dup15, <mem_ptr>)
+    LOG_STACK(dup16, <mem_ptr>)
+}
+
+
+
+
+
+//////////////////////  UTILS  /////////////////////////////
+
+#define macro _LOG_MEMORY(start, size, mem_ptr) = {
+    0x20 <mem_ptr> 0x04 add mstore
+    <size> <mem_ptr> 0x24 add mstore
+    <size> <mem_ptr> 0x44 add <size> <start> 0x04 gas 
+    staticcall pop
+
+    <size> 0x44 add STATIC_LOG(dup3, <mem_ptr>) pop
+}
+
+#define macro _LOG_CALLDATA(start, size, mem_ptr) = {
+    0x20 <mem_ptr> 0x04 add mstore
+    <size> <mem_ptr> 0x24 add mstore
+    <size> <start> <mem_ptr> 0x44 add calldatacopy
+
+    <size> 0x44 add STATIC_LOG(dup3, <mem_ptr>) pop
+}
+
+
+#define macro LOG_CALLDATA_TYPE(start, mem_ptr) = {
+    0x20 <start> <mem_ptr> 0x04 add calldatacopy
+
+    STATIC_LOG(0x24, <mem_ptr>)
+}
+
+#define macro LOG_STACK(dupN, mem_ptr) = {
+    <dupN> <mem_ptr> 0x04 add mstore
+
+    STATIC_LOG(0x24, <mem_ptr>)
+}
+
+#define macro STATIC_LOG(length, mem_ptr) = {
+    0x00 0x00 <length> <mem_ptr> 0x000000000000000000636F6e736F6c652e6c6f67 gas staticcall pop
+}

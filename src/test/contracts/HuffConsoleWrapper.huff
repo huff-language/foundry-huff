@@ -1,0 +1,256 @@
+#include "../../Console.huff"
+
+#define function logTest(uint256, uint256, uint256) pure returns (uint256)
+
+#define macro MAIN() = {
+    0x00 calldataload 0xE0 shr              // [sig]
+    dup1 __FUNC_SIG(logTest) eq logTestJump jumpi
+    0x00 0x00 revert
+    logTestJump:
+        LOG_TEST()
+}
+
+#define macro LOG_TEST() = {
+    __RIGHTPAD(0x4c4f472043414c4c44415441) 0x00 mstore
+    [RED] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0c, 0x40, 0x20)
+    // logs out calldata as bytes from offset 0x04 till 0x04 + 0x60 bytes and uses memory offset 0x00 for logging operations
+    LOG_CALLDATA(0x04, 0x60, 0x00)
+
+
+
+    LINE_BREAK(0x00, 0x20)
+    __RIGHTPAD(0x4c4f472043414c4c44415441205459504553) 0x00 mstore
+    [GREEN] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x12, 0x40, 0x20)
+
+    LOG_CALLDATA_AS_UINT(0x04, 0x00)
+    LOG_CALLDATA_AS_ADDRESS(0x04, 0x00)
+    LOG_CALLDATA_AS_BYTES32(0x04, 0x00)
+    LOG_CALLDATA_AS_INT(0x04, 0x00)
+    // logs out calldata as bytes from offset 0x04 till 0x04 + 0x20 bytes and uses memory offset 0x00 for logging operations
+    LOG_CALLDATA_AS_STRING(0x04, 0x20, 0x00)
+    
+    
+
+    LINE_BREAK(0x00, 0x20)
+    __RIGHTPAD(0x4c4f47204d454d4f5259) 0x00 mstore
+    [YELLOW] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0a, 0x40, 0x20)
+    __RIGHTPAD(0x4142434445464748494a4b4c4d4e4f505152535455565758595a) 0x00 mstore
+    // logs out memory as bytes from offset 0x00 till offset 0x00 + 0x06 bytes and uses memory offset 0x20 for logging operations
+    LOG_MEMORY(0x00, 0x1a, 0xa0)
+
+
+
+    LINE_BREAK(0x00, 0x20)
+    __RIGHTPAD(0x4c4f47204d454d4f525920415320535452494e47) 0x00 mstore
+    [BLUE] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x14, 0x40, 0x20)
+    __RIGHTPAD(0x4142434445464748494a4b4c4d4e4f505152535455565758595a) 0x00 mstore
+    // logs out memory as string from offset 0x00 till offset 0x00 + 0x06 bytes and uses memory offset 0x20 for logging operations
+    LOG_MEMORY_AS_STRING(0x00, 0x1a, 0x20)
+
+
+
+    LINE_BREAK(0x00, 0x20)
+    __RIGHTPAD(0x4c4f47204d454d4f525920415320535452494e47205354594c45) 0x00 mstore
+    [MAGENTA] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x1a, 0x40, 0x20)
+    // STYLE_LOGGING
+    // store the signature of the style type in memory
+    [CYAN] 0x20 mstore
+    __RIGHTPAD(0x4142434445464748494a4b4c4d4e4f505152535455565758595a) 0x00 mstore
+    // logs out memory as string from offset 0x00 till offset 0x00 + 0x06 bytes, uses memory offset 0x40 for logging operations 
+    // and the ;ast parameter specifies the offset where the styling signature is stored.
+    // notice it uses memory offset 0x40 for logging operations rather than 0x20, thats because 0x20 in this case is used to store the style sig
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x1a, 0x40, 0x20)
+
+
+
+    // fill up the stack for stack operations below
+    pc 0x4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45 caller 0x00 
+    gas 0x48bed44d1bcd124a28c27f343a817e5f5243190d3c52bf347daf876de1dbbf77 address 0x01                     
+    pc 0x4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45 caller 0x00 
+    gas 0x48bed44d1bcd124a28c27f343a817e5f5243190d3c52bf347daf876de1dbbf77 address 0x01                     // [0x01, address(this), randomHash, gas, 0x00, caller, randomHash, pc, 0x01, address(this), randomHash, gas, 0x00, caller, randomHash, pc]]
+
+              
+
+    LINE_BREAK(0x00, 0x20)
+
+    __RIGHTPAD(0x4c4f4720535441434b2031) 0x00 mstore
+    [RED] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0b, 0x40, 0x20)
+
+    LOG_STACK_1(0x00)
+
+
+    LINE_BREAK(0x00, 0x20)
+
+    __RIGHTPAD(0x4c4f4720535441434b2032) 0x00 mstore
+    [GREEN] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0b, 0x40, 0x20)
+
+    LOG_STACK_2(0x00)
+
+
+    LINE_BREAK(0x00, 0x20)
+
+    __RIGHTPAD(0x4c4f4720535441434b2033) 0x00 mstore
+    [YELLOW] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0b, 0x40, 0x20)
+
+    LOG_STACK_3(0x00)
+
+
+    LINE_BREAK(0x00, 0x20)
+
+    __RIGHTPAD(0x4c4f4720535441434b2034) 0x00 mstore
+    [BLUE] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0b, 0x40, 0x20)
+
+    LOG_STACK_4(0x00)
+
+
+    LINE_BREAK(0x00, 0x20)
+
+    __RIGHTPAD(0x4c4f4720535441434b2035) 0x00 mstore
+    [MAGENTA] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0b, 0x40, 0x20)
+
+    LOG_STACK_5(0x00)
+
+
+    LINE_BREAK(0x00, 0x20)
+
+    __RIGHTPAD(0x4c4f4720535441434b2036) 0x00 mstore
+    [BOLD] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0b, 0x40, 0x20)
+
+    LOG_STACK_6(0x00)
+
+
+    LINE_BREAK(0x00, 0x20)
+
+    __RIGHTPAD(0x4c4f4720535441434b2037) 0x00 mstore
+    [DIM] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0b, 0x40, 0x20)
+
+    LOG_STACK_7(0x00)
+
+
+    LINE_BREAK(0x00, 0x20)
+
+    __RIGHTPAD(0x4c4f4720535441434b2038) 0x00 mstore
+    [ITALIC] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0b, 0x40, 0x20)
+
+    LOG_STACK_8(0x00)
+
+
+    LINE_BREAK(0x00, 0x20)
+
+    __RIGHTPAD(0x4c4f4720535441434b2039) 0x00 mstore
+    [UNDERLINE] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0b, 0x40, 0x20)
+
+    LOG_STACK_9(0x00)
+
+
+    LINE_BREAK(0x00, 0x20)
+
+    __RIGHTPAD(0x4c4f4720535441434b203130) 0x00 mstore
+    [INVERSE] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0c, 0x40, 0x20)
+
+    LOG_STACK_10(0x00)
+
+
+    LINE_BREAK(0x00, 0x20)
+
+    __RIGHTPAD(0x4c4f4720535441434b203131) 0x00 mstore
+    [RED] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0c, 0x40, 0x20)
+
+    LOG_STACK_11(0x00)
+
+
+    LINE_BREAK(0x00, 0x20)
+
+    __RIGHTPAD(0x4c4f4720535441434b203132) 0x00 mstore
+    [GREEN] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0c, 0x40, 0x20)
+
+    LOG_STACK_12(0x00)
+
+
+    LINE_BREAK(0x00, 0x20)
+
+    __RIGHTPAD(0x4c4f4720535441434b203133) 0x00 mstore
+    [YELLOW] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0c, 0x40, 0x20)
+
+    LOG_STACK_13(0x00)
+
+
+    LINE_BREAK(0x00, 0x20)
+
+    __RIGHTPAD(0x4c4f4720535441434b203134) 0x00 mstore
+    [BLUE] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0c, 0x40, 0x20)
+
+    LOG_STACK_14(0x00)
+
+
+    LINE_BREAK(0x00, 0x20)
+
+    __RIGHTPAD(0x4c4f4720535441434b203135) 0x00 mstore
+    [MAGENTA] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0c, 0x40, 0x20)
+
+    LOG_STACK_15(0x00)
+
+
+    LINE_BREAK(0x00, 0x20)
+
+    __RIGHTPAD(0x4c4f4720535441434b203136) 0x00 mstore
+    [CYAN] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0c, 0x40, 0x20)
+
+    LOG_STACK_16(0x00)
+
+    
+
+    LINE_BREAK(0x00, 0x20)
+
+    __RIGHTPAD(0x4c4f4720535441434b205459504553) 0x00 mstore
+    [BOLD] 0x20 mstore
+    LOG_MEMORY_AS_STRING_STYLE(0x00, 0x0f, 0x40, 0x20)
+
+    // logs stack item 1 as a boolean
+    LOG_STACK_AS_BOOL(dup1, 0x00)               // [0x01, address(this), blockhash, gas, 0x00, caller, gasprice, pc]
+
+    // logs stack item 2 as an address
+    LOG_STACK_AS_ADDRESS(dup2, 0x00)            // [0x01, address(this), blockhash, gas, 0x00, caller, gasprice, pc]
+
+    // log stack item 3 as a bytes32
+    LOG_STACK_AS_BYTES32(dup3, 0x00)            // [0x01, address(this), blockhash, gas, 0x00, caller, gasprice, pc]
+
+    // log stack item 4 as a uint256
+    LOG_STACK_AS_UINT(dup4, 0x00)               // [0x01, address(this), blockhash, gas, 0x00, caller, gasprice, pc]
+
+    // logs stack item 5 as a boolean
+    LOG_STACK_AS_BOOL(dup5, 0x00)               // [0x01, address(this), blockhash, gas, 0x00, caller, gasprice, pc]
+
+    // log stack item 6 as an address
+    LOG_STACK_AS_ADDRESS(dup6, 0x00)            // [0x01, address(this), blockhash, gas, 0x00, caller, gasprice, pc]
+
+    // log stack item 7 as a bytes32
+    LOG_STACK_AS_BYTES32(dup7, 0x00)            // [0x01, address(this), blockhash, gas, 0x00, caller, gasprice, pc]
+
+    // log stack item 8 as a uint256
+    LOG_STACK_AS_UINT(dup8, 0x00)               // [0x01, address(this), blockhash, gas, 0x00, caller, gasprice, pc]
+
+    0x00 0x00 return
+}
+
