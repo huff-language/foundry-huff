@@ -85,7 +85,7 @@ contract HuffDeployerArguments {
     assert(construct.getArgTwo() == uint256(0x420));
   }
 
-  function depreciated_deploy() public {
+  function deprecated_deploy() public {
     address addr = HuffDeployer.deploy_with_args(
       "test/contracts/Constructor",
       bytes.concat(abi.encode(uint256(0x420)), abi.encode(uint256(0x420)))
@@ -155,7 +155,7 @@ contract HuffDeployerCode {
     assert(construct.getArgTwo() == uint256(0x420));
   }
 
-  function depreciated_deploy_with_code() public {
+  function deprecated_deploy_with_code() public {
     address addr = HuffDeployer.deploy_with_code(
       "test/contracts/Constructor",
       constructor_macro
