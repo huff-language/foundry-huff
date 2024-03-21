@@ -135,11 +135,8 @@ contract HuffConfig {
 
     /// @notice Get the evm version string | else return default ("shanghai")
     function get_evm_version() public view returns (string memory) {
-        bytes32 _evm_version = bytes32(bytes(abi.encodePacked(evm_version)));
-        if (_evm_version == bytes32(0x0)) {
-            return "shanghai";
-        }
-        return evm_version;
+        bytes32 _evm_version = bytes32(bytes(abi.encodePacked(evm_version)));   
+        return (_evm_version == bytes32(0x0)) ? "shanghai" : evm_version;
     }
 
     /// @notice Get the creation bytecode of a contract
