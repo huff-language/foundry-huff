@@ -36,7 +36,7 @@ Here is an example deployment (where the contract is located in [`src/test/contr
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.7.0 <0.9.0;
 
-import {HuffDeployer} from "foundry-huff/HuffDeployer";
+import {HuffDeployer} from "foundry-huff/HuffDeployer.sol";
 
 interface Number {
   function setNumber(uint256) external;
@@ -62,7 +62,7 @@ For example, to deploy the contract [`src/test/contracts/Constructor.huff`](src/
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.7.0 <0.9.0;
 
-import {HuffDeployer} from "foundry-huff/HuffDeployer";
+import {HuffDeployer} from "foundry-huff/HuffDeployer.sol";
 
 interface Constructor {
   function getArgOne() external returns (address);
@@ -108,7 +108,7 @@ Let's use the huff contract [`src/test/contracts/NoConstructor.huff`](./src/test
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.7.0 <0.9.0;
 
-import {HuffDeployer} from "foundry-huff/HuffDeployer";
+import {HuffDeployer} from "foundry-huff/HuffDeployer.sol";
 
 interface Constructor {
   function getArgOne() external returns (address);
