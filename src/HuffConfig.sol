@@ -232,7 +232,11 @@ contract HuffConfig {
 
         /// @notice deploy the bytecode with the create instruction
         address deployedAddress;
-        if (should_broadcast) vm.broadcast();
+        if (should_broadcast) {
+            // @notice stop current prank in order to broadcast to the network
+            vm.stopPrank();
+            vm.broadcast();
+        }
         assembly {
             let val := sload(value.slot)
             deployedAddress := create(val, add(concatenated, 0x20), mload(concatenated))
