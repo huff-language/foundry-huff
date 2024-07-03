@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
 if ! [[ "$(npm list -g huffc)" =~ "empty" ]]; then
   # huffc was installed via npm, return 0x00

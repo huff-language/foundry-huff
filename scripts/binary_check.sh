@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
 # Check if npm is installed
 if command -v npm &> /dev/null; then
