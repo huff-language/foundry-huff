@@ -30,10 +30,11 @@ contract HuffDeployerTest is Test {
 
         assertEq(entries.length, 1);
         assertEq(entries[0].topics.length, 3);
-        assertEq(entries[0].topics[0], bytes32(uint256(keccak256("ArgumentsUpdated(address,uint256)"))));
+        assertEq(
+            entries[0].topics[0], bytes32(uint256(keccak256("ArgumentsUpdated(address,uint256)")))
+        );
         assertEq(entries[0].topics[1], bytes32(uint256(uint160(address(0x420)))));
         assertEq(entries[0].topics[2], bytes32(uint256(0x420)));
-
     }
 
     function testChaining() public {
@@ -74,7 +75,9 @@ contract HuffDeployerTest is Test {
         Vm.Log[] memory entries = vm.getRecordedLogs();
         assertEq(entries.length, 1);
         assertEq(entries[0].topics.length, 3);
-        assertEq(entries[0].topics[0], bytes32(uint256(keccak256("ArgumentsUpdated(address,uint256)"))));
+        assertEq(
+            entries[0].topics[0], bytes32(uint256(keccak256("ArgumentsUpdated(address,uint256)")))
+        );
         assertEq(entries[0].topics[1], bytes32(uint256(uint160(address(0x420)))));
         assertEq(entries[0].topics[2], bytes32(uint256(0x420)));
 
@@ -89,17 +92,21 @@ contract HuffDeployerTest is Test {
             "    0x20                        // [size] - byte size to copy \n"
             "    0x40 codesize sub           // [offset, size] - offset in the code to copy from\n "
             "    0x00                        // [mem, offset, size] - offset in memory to copy to \n"
-            "    codecopy                    // [] \n" "    // Store the first argument in storage\n"
+            "    codecopy                    // [] \n"
+            "    // Store the first argument in storage\n"
             "    0x00 mload dup1             // [arg1, arg1] \n"
             "    [CONSTRUCTOR_ARG_ONE]       // [CONSTRUCTOR_ARG_ONE, arg1, arg1] \n"
-            "    sstore                      // [arg1] \n" "    // Copy the second argument into memory \n"
+            "    sstore                      // [arg1] \n"
+            "    // Copy the second argument into memory \n"
             "    0x20                        // [size, arg1] - byte size to copy \n"
             "    0x20 codesize sub           // [offset, size, arg1] - offset in the code to copy from \n"
             "    0x00                        // [mem, offset, size, arg1] - offset in memory to copy to \n"
-            "    codecopy                    // [arg1] \n" "    // Store the second argument in storage \n"
+            "    codecopy                    // [arg1] \n"
+            "    // Store the second argument in storage \n"
             "    0x00 mload dup1             // [arg2, arg2, arg1] \n"
             "    [CONSTRUCTOR_ARG_TWO]       // [CONSTRUCTOR_ARG_TWO, arg2, arg2, arg1] \n"
-            "    sstore                      // [arg2, arg1] \n" "    // Emit the owner updated event \n"
+            "    sstore                      // [arg2, arg1] \n"
+            "    // Emit the owner updated event \n"
             "    swap1                            // [arg1, arg2] \n"
             "    [ARGUMENTS_TOPIC]                // [sig, arg1, arg2] \n"
             "    0x00 0x00                        // [0, 0, sig, arg1, arg2] \n"
@@ -108,14 +115,17 @@ contract HuffDeployerTest is Test {
         // New pattern
         vm.recordLogs();
         IConstructor chained = IConstructor(
-            HuffDeployer.config_with_create_2(1).with_args(bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420))))
-                .with_code(constructor_macro).deploy("test/contracts/NoConstructor")
+            HuffDeployer.config_with_create_2(1).with_args(
+                bytes.concat(abi.encode(address(0x420)), abi.encode(uint256(0x420)))
+            ).with_code(constructor_macro).deploy("test/contracts/NoConstructor")
         );
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
         assertEq(entries.length, 1);
         assertEq(entries[0].topics.length, 3);
-        assertEq(entries[0].topics[0], bytes32(uint256(keccak256("ArgumentsUpdated(address,uint256)"))));
+        assertEq(
+            entries[0].topics[0], bytes32(uint256(keccak256("ArgumentsUpdated(address,uint256)")))
+        );
         assertEq(entries[0].topics[1], bytes32(uint256(uint160(address(0x420)))));
         assertEq(entries[0].topics[2], bytes32(uint256(0x420)));
 
@@ -147,7 +157,9 @@ contract HuffDeployerTest is Test {
 
     function testWithValueDeployment_Create2() public {
         uint256 value = 1 ether;
-        HuffDeployer.config_with_create_2(1).with_value(value).deploy{value: value}("test/contracts/ConstructorNeedsValue");
+        HuffDeployer.config_with_create_2(1).with_value(value).deploy{value: value}(
+            "test/contracts/ConstructorNeedsValue"
+        );
     }
 
     function testConstantOverride() public {
@@ -181,25 +193,28 @@ contract HuffDeployerTest is Test {
     function testConstantOverride_Create2() public {
         // Test address constant
         address a = 0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF;
-        address deployed = HuffDeployer.config_with_create_2(1).with_addr_constant("a", a).with_constant("b", "0x420").deploy(
-            "test/contracts/ConstOverride"
-        );
+        address deployed = HuffDeployer.config_with_create_2(1).with_addr_constant("a", a)
+            .with_constant("b", "0x420").deploy("test/contracts/ConstOverride");
         assertEq(getCode(deployed), hex"73DeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF610420");
 
         // Test uint constant
-        address deployed_2 = HuffDeployer.config_with_create_2(2).with_uint_constant("a", 32).with_constant("b", "0x420").deploy(
-            "test/contracts/ConstOverride"
-        );
+        address deployed_2 = HuffDeployer.config_with_create_2(2).with_uint_constant("a", 32)
+            .with_constant("b", "0x420").deploy("test/contracts/ConstOverride");
         assertEq(getCode(deployed_2), hex"6020610420");
 
         // Test bytes32 constant
-        address deployed_3 = HuffDeployer.config_with_create_2(3).with_bytes32_constant("a", bytes32(hex"01")).with_constant(
-            "b", "0x420"
-        ).deploy("test/contracts/ConstOverride");
-        assertEq(getCode(deployed_3), hex"7f0100000000000000000000000000000000000000000000000000000000000000610420");
+        address deployed_3 = HuffDeployer.config_with_create_2(3).with_bytes32_constant(
+            "a", bytes32(hex"01")
+        ).with_constant("b", "0x420").deploy("test/contracts/ConstOverride");
+        assertEq(
+            getCode(deployed_3),
+            hex"7f0100000000000000000000000000000000000000000000000000000000000000610420"
+        );
 
         // Keep default "a" value and assign "b", which is unassigned in "ConstOverride.huff"
-        address deployed_4 = HuffDeployer.config_with_create_2(4).with_constant("b", "0x420").deploy("test/contracts/ConstOverride");
+        address deployed_4 = HuffDeployer.config_with_create_2(4).with_constant("b", "0x420").deploy(
+            "test/contracts/ConstOverride"
+        );
         assertEq(getCode(deployed_4), hex"6001610420");
     }
 
@@ -225,28 +240,50 @@ contract HuffDeployerTest is Test {
         assertEq(num, number.getNumber());
     }
 
-    function testConstructorDefaultCaller() public {
+    function testConstructorDefaultCallerUseBroadcast() public {
         HuffConfig config = HuffDeployer.config();
-        IRememberCreator rememberer = IRememberCreator(config.deploy("test/contracts/RememberCreator"));
+        IRememberCreator rememberer =
+            IRememberCreator(config.set_broadcast(true).deploy("test/contracts/RememberCreator"));
         assertEq(rememberer.CREATOR(), address(config));
     }
 
-    function runTestConstructorCaller(address deployer) public {
+    function testConstructorDefaultCallerUsePrank() public {
+        HuffConfig config = HuffDeployer.config();
+        IRememberCreator rememberer =
+            IRememberCreator(config.set_broadcast(false).deploy("test/contracts/RememberCreator"));
+        assertEq(rememberer.CREATOR(), address(config));
+    }
+
+    function runTestConstructorGivenCallerUseBroadcast(address deployer) public {
         IRememberCreator rememberer = IRememberCreator(
-            HuffDeployer
-                .config()
-                .with_deployer(deployer)
-                .deploy("test/contracts/RememberCreator")
+            HuffDeployer.config().with_deployer(deployer).set_broadcast(true).deploy(
+                "test/contracts/RememberCreator"
+            )
+        );
+        assertEq(rememberer.CREATOR(), deployer);
+    }
+
+    function runTestConstructorGivenCallerUsePrank(address deployer) public {
+        IRememberCreator rememberer = IRememberCreator(
+            HuffDeployer.config().with_deployer(deployer).deploy("test/contracts/RememberCreator")
         );
         assertEq(rememberer.CREATOR(), deployer);
     }
 
     // @dev fuzzed test too slow, random examples and address(0) chosen
     function testConstructorCaller() public {
-        runTestConstructorCaller(address(uint160(uint256(keccak256("random addr 1")))));
-        runTestConstructorCaller(address(uint160(uint256(keccak256("random addr 2")))));
-        runTestConstructorCaller(address(0));
-        runTestConstructorCaller(address(uint160(0x1000)));
+        runTestConstructorGivenCallerUseBroadcast(
+            address(uint160(uint256(keccak256("random addr 1"))))
+        );
+        runTestConstructorGivenCallerUseBroadcast(
+            address(uint160(uint256(keccak256("random addr 2"))))
+        );
+        runTestConstructorGivenCallerUseBroadcast(address(0));
+        runTestConstructorGivenCallerUseBroadcast(address(uint160(0x1000)));
+        runTestConstructorGivenCallerUsePrank(address(uint160(uint256(keccak256("random addr 1")))));
+        runTestConstructorGivenCallerUsePrank(address(uint160(uint256(keccak256("random addr 2")))));
+        runTestConstructorGivenCallerUsePrank(address(0));
+        runTestConstructorGivenCallerUsePrank(address(uint160(0x1000)));
     }
 
     /// @dev test that compilation is different with new evm versions
